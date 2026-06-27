@@ -19,6 +19,8 @@ export interface Profile {
   email: string;
   phone: string;
   address: string;
+  birthPlace?: string;
+  birthDate?: string;
   socials: {
     facebook?: string;
     instagram?: string;
@@ -36,6 +38,7 @@ export interface Education {
   startYear: string;
   endYear: string;
   description?: string;
+  fileUrl?: string;
 }
 
 export interface Career {
@@ -45,16 +48,19 @@ export interface Career {
   startYear: string;
   endYear: string; // "Sekarang" atau tahun
   description?: string;
+  fileUrl?: string;
 }
 
 export interface DevelopmentEvent {
   id: string;
-  type: "Workshop" | "Webinar" | "Seminar" | "Diklat" | "Pelatihan" | "Sertifikasi" | "Narasumber";
+  type: "Workshop" | "Seminar/Webinar" | "Diklat" | "Bimtek" | "Pelatihan" | "Sertifikasi" | "Narasumber";
   title: string;
   organizer: string;
-  date: string;
+  year: string;
+  date?: string; // Optional for backwards compatibility
   hours?: number; // JP (Jam Pelajaran)
   certificateUrl?: string;
+  showOnFront?: boolean;
 }
 
 export interface Achievement {
@@ -121,6 +127,7 @@ export interface StudentImpact {
   chartInitialValues: number[];
   chartFinalValues: number[];
   documentationUrls: string[];
+  fileUrl?: string;
 }
 
 export interface TeacherCompetency {
@@ -167,6 +174,7 @@ export interface Document {
   description?: string;
   fileUrl?: string;
   uploadDate: string;
+  linkType?: "pdf" | "external";
 }
 
 export interface Article {
@@ -201,6 +209,7 @@ export interface WebsiteSettings {
     profil: boolean;
     pendidikan: boolean;
     karier: boolean;
+    tugasTambahan?: boolean;
     pengembanganDiri: boolean;
     prestasi: boolean;
     karya: boolean;
@@ -214,6 +223,22 @@ export interface WebsiteSettings {
     dokumen: boolean;
     artikel: boolean;
     kontak: boolean;
+  };
+  pdfVisibility?: {
+    profil?: boolean;
+    pendidikan?: boolean;
+    karier?: boolean;
+    tugasTambahan?: boolean;
+    pengembanganDiri?: boolean;
+    prestasi?: boolean;
+    karya?: boolean;
+    inovasi?: boolean;
+    bestPractice?: boolean;
+    dampakSiswa?: boolean;
+    kompetensi?: boolean;
+    organisasi?: boolean;
+    sertifikat?: boolean;
+    dokumen?: boolean;
   };
 }
 

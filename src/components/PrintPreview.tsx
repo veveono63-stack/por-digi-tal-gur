@@ -6,7 +6,7 @@
 import React from "react";
 import { PortfolioData } from "../types";
 import { FileText, Award, Calendar, GraduationCap, Briefcase, Mail, Phone, MapPin, BookOpen, Settings, Download, Printer } from "lucide-react";
-import { formatDate } from "../utils";
+import { formatDate, getDirectImageUrl } from "../utils";
 
 interface PrintPreviewProps {
   data: PortfolioData;
@@ -15,7 +15,8 @@ interface PrintPreviewProps {
 }
 
 export default function PrintPreview({ data, onClose, printType }: PrintPreviewProps) {
-  const { profile, education, career, additionalTasks = [], developmentEvents, achievements, works, innovations, organizations } = data;
+  const { profile, education, career, additionalTasks = [], developmentEvents, achievements, works, innovations, organizations, settings } = data;
+  const [paperSize, setPaperSize] = React.useState<"asli" | "A4" | "F4">("asli");
 
   const isIframe = React.useMemo(() => {
     try {
@@ -33,7 +34,7 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [isIframe]);
+  }, [isIframe, paperSize]);
 
   const handleAction = () => {
     if (isIframe) {
@@ -43,8 +44,69 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
     }
   };
 
+  const getPageStyle = () => {
+    switch (paperSize) {
+      case "asli":
+        return `
+          @media print {
+            @page {
+              size: 210mm 4000mm;
+              margin: 15mm;
+            }
+            body, html, #root {
+              height: auto !important;
+              background-color: white !important;
+            }
+            .print-section {
+              page-break-inside: auto !important;
+              break-inside: auto !important;
+            }
+          }
+        `;
+      case "A4":
+        return `
+          @media print {
+            @page {
+              size: A4;
+              margin: 15mm;
+            }
+            body, html, #root {
+              height: auto !important;
+              background-color: white !important;
+            }
+            .print-section {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+          }
+        `;
+      case "F4":
+        return `
+          @media print {
+            @page {
+              size: 215mm 330mm;
+              margin: 15mm;
+            }
+            body, html, #root {
+              height: auto !important;
+              background-color: white !important;
+            }
+            .print-section {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+          }
+        `;
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 p-8 text-slate-900 print:p-0 print:bg-white">
+      {/* Inject Dynamic CSS Stylesheet berdasarkan ukuran kertas yang dipilih */}
+      <style dangerouslySetInnerHTML={{ __html: getPageStyle() }} />
+
       {isIframe && (
         <div className="max-w-4xl mx-auto mb-6 bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-4 print:hidden animate-fade-in shadow-sm">
           <div className="text-left space-y-1">
@@ -64,45 +126,85 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
         </div>
       )}
 
-      {/* Back button for screen viewing */}
-      <div className="max-w-4xl mx-auto mb-6 flex justify-between items-center bg-slate-100 p-4 rounded-lg border border-slate-200 print:hidden">
-        <div className="flex items-center space-x-2">
-          <FileText className="text-amber-600" />
+      {/* Back button and paper size controls for screen viewing */}
+      <div className="max-w-4xl mx-auto mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg border border-slate-200 print:hidden text-left">
+        <div className="flex items-center space-x-2.5">
+          <FileText className="text-amber-600 shrink-0" size={20} />
           <div className="text-left">
-            <h4 className="font-bold text-slate-800">Pratinjau Cetak {printType === "cv" ? "CV Digital" : "Portofolio Lengkap"}</h4>
-            <p className="text-xs text-slate-500">
+            <h4 className="font-extrabold text-slate-800 text-xs sm:text-sm leading-tight">Pratinjau Cetak {printType === "cv" ? "CV Digital" : "Portofolio Lengkap"}</h4>
+            <p className="text-[11px] text-slate-500 leading-normal mt-0.5">
               {isIframe 
                 ? "Buka di tab baru terlebih dahulu untuk mencetak/menyimpan PDF secara penuh." 
-                : "Dialog pencetakan browser otomatis muncul. Atur orientasi ke Portret, ukuran kertas A4, dan centang 'Cetak background' (Background graphics) agar tata letak warna presisi."}
+                : paperSize === "asli"
+                  ? "Sangat cocok untuk PDF digital agar portofolio tidak terpotong garis halaman."
+                  : `Menyesuaikan kertas fisik ${paperSize}. Atur ukuran kertas di dialog cetak browser ke ${paperSize === "A4" ? "A4" : "US Legal / Folio (215x330mm)"}.`}
             </p>
           </div>
         </div>
-        <div className="flex space-x-3 shrink-0">
+
+        {/* Paper Size selector */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Ukuran Kertas:</span>
+          <div className="inline-flex rounded-lg border border-slate-300 p-0.5 bg-white shadow-sm">
+            <button
+              onClick={() => setPaperSize("asli")}
+              className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${
+                paperSize === "asli" 
+                  ? "bg-amber-600 text-white shadow-sm" 
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              Ukuran Asli
+            </button>
+            <button
+              onClick={() => setPaperSize("A4")}
+              className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${
+                paperSize === "A4" 
+                  ? "bg-amber-600 text-white shadow-sm" 
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              A4
+            </button>
+            <button
+              onClick={() => setPaperSize("F4")}
+              className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${
+                paperSize === "F4" 
+                  ? "bg-amber-600 text-white shadow-sm" 
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              F4
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 shrink-0">
           <button
             onClick={handleAction}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow transition flex items-center space-x-1.5"
+            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow transition flex items-center space-x-1.5"
             title="Gunakan dialog cetak browser lalu pilih opsi 'Simpan sebagai PDF' (Save as PDF)"
           >
             <Download size={13} />
-            <span>Simpan / Download PDF</span>
+            <span>Simpan PDF</span>
           </button>
           <button
             onClick={handleAction}
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow transition flex items-center space-x-1.5"
+            className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow transition flex items-center space-x-1.5"
           >
             <Printer size={13} />
-            <span>Cetak Ulang</span>
+            <span>Cetak</span>
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition"
+            className="px-3.5 py-1.5 bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold rounded-lg transition"
           >
-            Kembali ke Web
+            Kembali
           </button>
         </div>
       </div>
 
-      {/* A4 Sheet Container */}
+      {/* Sheet Container */}
       <div className="max-w-4xl mx-auto border border-slate-200 p-8 shadow-md rounded bg-white print:border-0 print:p-0 print:shadow-none">
         
         {/* CV Header */}
@@ -110,7 +212,7 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
           <div className="flex items-start space-x-4">
             {profile.photoUrl && (
               <img
-                src={profile.photoUrl}
+                src={getDirectImageUrl(profile.photoUrl)}
                 alt={profile.fullName}
                 className="w-24 h-24 object-cover rounded-xl border border-slate-300 shadow-sm shrink-0"
                 referrerPolicy="no-referrer"
@@ -128,60 +230,75 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
             <p className="flex items-center justify-end"><Mail size={12} className="mr-1.5" /> {profile.email}</p>
             <p className="flex items-center justify-end"><Phone size={12} className="mr-1.5" /> {profile.phone}</p>
             <p className="flex items-center justify-end"><MapPin size={12} className="mr-1.5" /> {profile.address || "Jakarta, Indonesia"}</p>
+            {(profile.birthPlace || profile.birthDate) && (
+              <p className="flex items-center justify-end">
+                <Calendar size={12} className="mr-1.5" />
+                Lahir: {profile.birthPlace || ""}{profile.birthPlace && profile.birthDate ? ", " : ""}{profile.birthDate ? formatDate(profile.birthDate) : ""}
+              </p>
+            )}
             <p className="font-mono mt-2">NIP: {profile.nip || "-"}</p>
             <p className="font-mono">Gol: {profile.rank || "-"}</p>
           </div>
         </div>
 
         {/* Executive Summary */}
-        <div className="mb-6">
-          <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">Profil Profesional</h2>
-          <p className="text-xs text-slate-700 leading-relaxed text-justify">{profile.bio}</p>
-        </div>
+        {settings.pdfVisibility?.profil !== false && (
+          <div className="mb-6 print-section">
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">Profil Profesional</h2>
+            <p className="text-xs text-slate-700 leading-relaxed text-justify">{profile.bio}</p>
+          </div>
+        )}
 
         {/* Grid for Education & Career */}
-        <div className="grid grid-cols-2 gap-6 mb-6">
-          
-          {/* Education Section */}
-          <div>
-            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Riwayat Pendidikan</h2>
-            <div className="space-y-3">
-              {education.map((edu) => (
-                <div key={edu.id} className="relative pl-3 border-l-2 border-slate-300">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-xs font-bold text-slate-900">{edu.level} - {edu.institution}</h3>
-                    <span className="text-[10px] font-mono text-slate-500 shrink-0">{edu.startYear}-{edu.endYear}</span>
-                  </div>
-                  {edu.major && <p className="text-[10px] text-slate-600 font-medium">Jurusan: {edu.major}</p>}
-                  {edu.description && <p className="text-[9px] text-slate-500 mt-0.5">{edu.description}</p>}
+        {((settings.pdfVisibility?.pendidikan !== false && education.length > 0) || 
+          (settings.pdfVisibility?.karier !== false && career.length > 0)) && (
+          <div className="grid grid-cols-2 gap-6 mb-6 print-section">
+            
+            {/* Education Section */}
+            {settings.pdfVisibility?.pendidikan !== false && education.length > 0 ? (
+              <div>
+                <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Riwayat Pendidikan</h2>
+                <div className="space-y-3">
+                  {education.map((edu) => (
+                    <div key={edu.id} className="relative pl-3 border-l-2 border-slate-300">
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-xs font-bold text-slate-900">{edu.level} - {edu.institution}</h3>
+                        <span className="text-[10px] font-mono text-slate-500 shrink-0">{edu.startYear}-{edu.endYear}</span>
+                      </div>
+                      {edu.major && <p className="text-[10px] text-slate-600 font-medium">Jurusan: {edu.major}</p>}
+                      {edu.description && <p className="text-[9px] text-slate-500 mt-0.5">{edu.description}</p>}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            ) : <div />}
 
-          {/* Career Section */}
-          <div>
-            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Pengalaman Karier</h2>
-            <div className="space-y-3">
-              {career.map((car) => (
-                <div key={car.id} className="relative pl-3 border-l-2 border-slate-300">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-xs font-bold text-slate-900">{car.position}</h3>
-                    <span className="text-[10px] font-mono text-slate-500 shrink-0">{car.startYear}-{car.endYear}</span>
-                  </div>
-                  <p className="text-[10px] font-medium text-amber-700">{car.institution}</p>
-                  {car.description && <p className="text-[9px] text-slate-500 mt-0.5">{car.description}</p>}
+            {/* Career Section */}
+            {settings.pdfVisibility?.karier !== false && career.length > 0 ? (
+              <div>
+                <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Pengalaman Karier</h2>
+                <div className="space-y-3">
+                  {career.map((car) => (
+                    <div key={car.id} className="relative pl-3 border-l-2 border-slate-300">
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-xs font-bold text-slate-900">{car.position}</h3>
+                        <span className="text-[10px] font-mono text-slate-500 shrink-0">{car.startYear}-{car.endYear}</span>
+                      </div>
+                      <p className="text-[10px] font-medium text-amber-700">{car.institution}</p>
+                      {car.description && <p className="text-[9px] text-slate-500 mt-0.5">{car.description}</p>}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            ) : <div />}
 
-        </div>
+          </div>
+        )}
 
         {/* Tugas Tambahan Section (2 Kolom, Tepat di Atas Prestasi & Penghargaan) */}
-        {additionalTasks && additionalTasks.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Riwayat Tugas Tambahan</h2>
+        {settings.pdfVisibility?.tugasTambahan !== false && additionalTasks && additionalTasks.length > 0 && (
+          <div className="mb-6 print-section">
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Tugas Tambahan</h2>
             <div className="grid grid-cols-2 gap-4">
               {additionalTasks.map((task) => (
                 <div key={task.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded text-xs">
@@ -198,8 +315,8 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
         )}
 
         {/* Achievements Section */}
-        {achievements.length > 0 && (
-          <div className="mb-6">
+        {settings.pdfVisibility?.prestasi !== false && achievements.length > 0 && (
+          <div className="mb-6 print-section">
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Prestasi & Penghargaan</h2>
             <div className="grid grid-cols-2 gap-4">
               {achievements.map((ach) => (
@@ -217,75 +334,74 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
         )}
 
         {/* Development & Workshop Events */}
-        {developmentEvents.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Pengembangan Kompetensi / Diklat</h2>
-            <div className="space-y-2">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider text-[9px] font-bold border-b border-slate-300">
-                    <th className="py-1.5 px-2">Kategori</th>
-                    <th className="py-1.5 px-2">Nama Program / Seminar</th>
-                    <th className="py-1.5 px-2">Penyelenggara</th>
-                    <th className="py-1.5 px-2 font-mono">Tgl</th>
-                    <th className="py-1.5 px-2 text-right">Durasi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {developmentEvents.map((event) => (
-                    <tr key={event.id} className="text-[10px] text-slate-700">
-                      <td className="py-1.5 px-2 font-bold text-slate-900">{event.type}</td>
-                      <td className="py-1.5 px-2 font-medium">{event.title}</td>
-                      <td className="py-1.5 px-2 text-slate-500">{event.organizer}</td>
-                      <td className="py-1.5 px-2 font-mono text-slate-500">{formatDate(event.date)}</td>
-                      <td className="py-1.5 px-2 text-right font-semibold">{event.hours ? `${event.hours} JP` : "-"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {settings.pdfVisibility?.pengembanganDiri !== false && (() => {
+          const sortedEvents = developmentEvents;
+          const shownEvents = sortedEvents.filter(e => e.showOnFront !== false);
+          const hiddenCount = sortedEvents.filter(e => e.showOnFront === false).length;
+
+          if (shownEvents.length === 0 && hiddenCount === 0) return null;
+
+          return (
+            <div className="mb-6 print-section">
+              <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Pengembangan Kompetensi / Diklat</h2>
+              <div className="space-y-2">
+                {shownEvents.length > 0 ? (
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider text-[9px] font-bold border-b border-slate-300">
+                        <th className="py-1.5 px-2">Kategori</th>
+                        <th className="py-1.5 px-2">Nama Program / Seminar</th>
+                        <th className="py-1.5 px-2">Penyelenggara</th>
+                        <th className="py-1.5 px-2">Tahun</th>
+                        <th className="py-1.5 px-2 text-right">Durasi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {shownEvents.map((event) => (
+                        <tr key={event.id} className="text-[10px] text-slate-700">
+                          <td className="py-1.5 px-2 font-bold text-slate-900">{event.type}</td>
+                          <td className="py-1.5 px-2 font-medium">{event.title}</td>
+                          <td className="py-1.5 px-2 text-slate-500">{event.organizer}</td>
+                          <td className="py-1.5 px-2 font-mono text-slate-500">{event.year || (event.date ? event.date.substring(0, 4) : "")}</td>
+                          <td className="py-1.5 px-2 text-right font-semibold">{event.hours ? `${event.hours} JP` : "-"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-[10px] text-slate-500 italic">Tidak ada pengembangan diri yang ditandai untuk ditampilkan.</p>
+                )}
+                
+                {hiddenCount > 0 && (
+                  <p className="text-[10px] text-slate-600 font-semibold italic text-right mt-2">
+                    Dan {hiddenCount} pengembangan diri lainnya
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Works & Publications */}
-        {works.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Karya & Publikasi Ilmiah</h2>
-            <ul className="space-y-2">
+        {settings.pdfVisibility?.karya !== false && works.length > 0 && (
+          <div className="mb-6 print-section">
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Karya Inovasi dan Publikasi</h2>
+            <ul className="list-disc list-outside pl-5 space-y-2">
               {works.map((work) => (
-                <li key={work.id} className="text-xs list-disc list-inside text-slate-800">
-                  <span className="font-bold">[{work.type}]</span> <span className="italic font-medium">"{work.title}"</span> — {work.publisher || "Publikasi Mandiri"}, {work.year}
-                  {work.description && <p className="text-[10px] text-slate-500 pl-4 mt-0.5">{work.description}</p>}
+                <li key={work.id} className="text-xs text-slate-800">
+                  <div>
+                    <span className="font-bold">[{work.type}]</span> <span className="italic font-medium">"{work.title}"</span> — {work.publisher || "Publikasi Mandiri"}, {work.year}
+                    {work.description && <p className="text-[10px] text-slate-500 mt-0.5">{work.description}</p>}
+                  </div>
                 </li>
               ))}
             </ul>
           </div>
         )}
 
-        {/* Innovations / Best Practices if full Portfolio is requested */}
-        {printType === "full" && innovations.length > 0 && (
-          <div className="page-break-before mt-8">
-            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Dokumentasi Inovasi Unggulan</h2>
-            {innovations.map((inn) => (
-              <div key={inn.id} className="space-y-2 text-xs text-slate-700 leading-relaxed mb-6">
-                <h3 className="font-bold text-sm text-slate-900">{inn.name}</h3>
-                <p><span className="font-semibold text-slate-900">Latar Belakang:</span> {inn.background}</p>
-                <p><span className="font-semibold text-slate-900">Permasalahan:</span> {inn.problem}</p>
-                <p><span className="font-semibold text-slate-900">Solusi & Sintaks:</span> {inn.solution}</p>
-                <ul className="list-decimal list-inside pl-2 space-y-1 mt-1 font-medium">
-                  {inn.syntax.map((syn, idx) => (
-                    <li key={idx} className="text-[10px]">{syn}</li>
-                  ))}
-                </ul>
-                <p className="mt-1"><span className="font-semibold text-slate-900">Hasil & Dampak:</span> {inn.impact}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Organizations & Community */}
-        {organizations.length > 0 && (
-          <div className="mb-6">
+        {settings.pdfVisibility?.organisasi !== false && organizations.length > 0 && (
+          <div className="mb-6 print-section">
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3 font-sans">Organisasi & Keanggotaan</h2>
             <div className="grid grid-cols-2 gap-3 text-xs">
               {organizations.map((org) => (

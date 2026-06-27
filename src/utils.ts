@@ -63,7 +63,11 @@ export function getEmbedUrl(url: string | undefined | null): {
   
   // 2. PDF URL check
   if (/\.pdf/i.test(cleanUrl)) {
-    return { type: 'pdf', embedUrl: cleanUrl };
+    const isLocal = cleanUrl.startsWith('/') || cleanUrl.startsWith('.') || !/^https?:\/\//i.test(cleanUrl);
+    if (isLocal) {
+      return { type: 'pdf', embedUrl: cleanUrl };
+    }
+    return { type: 'iframe', embedUrl: `https://docs.google.com/viewer?url=${encodeURIComponent(cleanUrl)}&embedded=true` };
   }
   
   // 3. Google Drive view link check
@@ -99,3 +103,37 @@ export function getEmbedUrl(url: string | undefined | null): {
   // 6. Generic external link fallback
   return { type: 'generic', embedUrl: cleanUrl };
 }
+
+/**
+ * Transforms any photo URL (including Google Drive, local paths, etc.)
+ * to a direct, browser-displayable image URL.
+ */
+export function getDirectImageUrl(url: string | undefined | null): string {
+  if (!url) return '';
+  const cleanUrl = url.trim();
+
+  // If it's already a direct Google usercontent link, keep it as is
+  if (cleanUrl.includes("lh3.googleusercontent.com")) {
+    return cleanUrl;
+  }
+
+  // Extract Google Drive ID
+  let fileId = '';
+  
+  const driveMatch = cleanUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (driveMatch && driveMatch[1]) {
+    fileId = driveMatch[1];
+  } else {
+    const driveIdMatch = cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (driveIdMatch && driveIdMatch[1]) {
+      fileId = driveIdMatch[1];
+    }
+  }
+
+  if (fileId) {
+    return `https://lh3.googleusercontent.com/u/0/d/${fileId}`;
+  }
+
+  return cleanUrl;
+}
+

@@ -158,43 +158,699 @@ const INITIAL_ADDITIONAL_TASKS: AdditionalTask[] = [
 
 const INITIAL_EVENTS: DevelopmentEvent[] = [
   {
-    id: "dev_1",
+    id: "dev_pdf_1",
+    type: "Seminar/Webinar",
+    title: "Webinar Kelas Berkualitas Bukan Kebetulan, Rahasia Praktik Pembelajaran Mendalam",
+    organizer: "Kelas Pengajar",
+    year: "2026",
+    hours: 32,
+    showOnFront: true
+  },
+  {
+    id: "dev_pdf_2",
+    type: "Bimtek",
+    title: "BIMBINGAN TEKNIS TATA KELOLA PERSURATAN, KEARSIPAN DAN PELAYANAN PUBLIK",
+    organizer: "Dinas Pendidikan Kabupaten Tulungagung",
+    year: "2025",
+    hours: 3,
+    showOnFront: true
+  },
+  {
+    id: "dev_pdf_3",
     type: "Diklat",
-    title: "Pendidikan Guru Penggerak Angkatan 5",
-    organizer: "BBGP Provinsi DKI Jakarta / Kemendikbudristek",
-    date: "2022-10-15",
-    hours: 310
+    title: "Diklat Pembelajaran Mendalam (Deep Learning) bagi Kepala Sekolah dan Guru Sekolah Dasar Negeri/Swasta Se-Kecamatan Karangrejo",
+    organizer: "Kelompok Kerja Kepala Sekolah (K3S) Kec. Karangrejo",
+    year: "2025",
+    hours: 32,
+    showOnFront: true
   },
   {
-    id: "dev_2",
-    type: "Workshop",
-    title: "Penyusunan Modul Ajar dan Asesmen Kurikulum Merdeka",
-    organizer: "Dinas Pendidikan DKI Jakarta",
-    date: "2023-03-22",
-    hours: 32
+    id: "dev_pdf_4",
+    type: "Diklat",
+    title: "Diklat Proyek Pintar Menggunakan Coding dan Micro:bit untuk Mendorong Berpikir Komputasional Siswa",
+    organizer: "Guru Mengajar",
+    year: "2025",
+    hours: 32,
+    showOnFront: true
   },
   {
-    id: "dev_3",
-    type: "Narasumber",
-    title: "Praktik Baik Pembelajaran Diferensiasi Berbantuan AI",
-    organizer: "MGMP Fisika SMA Provinsi DKI Jakarta",
-    date: "2024-05-11",
-    hours: 4
+    id: "dev_pdf_5",
+    type: "Diklat",
+    title: "Diklat Coding & AI : Praktis Mengenalkan Kecerdasan Artifisial di Kelas",
+    organizer: "Guru Mengajar",
+    year: "2025",
+    hours: 32,
+    showOnFront: true
   },
   {
-    id: "dev_4",
+    id: "dev_pdf_6",
+    type: "Diklat",
+    title: "Diklat Pembelajaran Interaktif dengan Quizizz Terintegrasi Belajar.id",
+    organizer: "Guru Mengajar",
+    year: "2024",
+    hours: 32,
+    showOnFront: true
+  },
+  {
+    id: "dev_pdf_7",
+    type: "Diklat",
+    title: "Diklat Asesmen Awal Masa Transisi PAUD ke SD Menyambut Tahun Ajaran Baru",
+    organizer: "GURU MENGAJAR",
+    year: "2024",
+    hours: 32,
+    showOnFront: true
+  },
+  {
+    id: "dev_pdf_8",
+    type: "Bimtek",
+    title: "Bimtek Penguatan Implementasi Kurikulum Merdeka bagi Guru Kelas III, VI, dan Mapel Sekolah Dasar",
+    organizer: "Dinas Pendidikan Kabupaten Tulungagung",
+    year: "2024",
+    hours: 32,
+    showOnFront: true
+  },
+  {
+    id: "dev_pdf_9",
+    type: "Diklat",
+    title: "Diklat Pembelajaran STEM pada Implementasi Kurikulum Merdeka",
+    organizer: "GURUMENGAJAR.ID",
+    year: "2024",
+    hours: 32,
+    showOnFront: true
+  },
+  {
+    id: "dev_pdf_10",
+    type: "Diklat",
+    title: "Diklat Pengelolaan Kinerja Guru dan Kepala Sekolah pada Platform Merdeka Mengajar",
+    organizer: "Belajar Era Digital",
+    year: "2024",
+    hours: 32,
+    showOnFront: true
+  },
+  {
+    id: "dev_pdf_11",
     type: "Pelatihan",
-    title: "Google Certified Educator Level 1 & 2 Course",
-    organizer: "REFO Indonesia",
-    date: "2023-08-10",
-    hours: 64
+    title: "Strategi Efektif: Peningkatan Keterampilan Guru Dengan Memaksimalkan Penggunaan Platform Merdeka Mengajar",
+    organizer: "Guru Juara dan edukarya",
+    year: "2024",
+    hours: 32,
+    showOnFront: false
   },
   {
-    id: "dev_5",
-    type: "Seminar",
-    title: "International Conference on Science Education",
-    organizer: "Universitas Negeri Jakarta",
-    date: "2024-11-20"
+    id: "dev_pdf_12",
+    type: "Seminar/Webinar",
+    title: "Kunci Sukses Sekolah: Implementasi & Optimalisasi Kurikulum Merdeka Tahun 2024 di Satuan Pendidikan",
+    organizer: "UNNES",
+    year: "2024",
+    hours: 40,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_13",
+    type: "Pelatihan",
+    title: "Pelatihan Mandiri dalam Platform Merdeka Mengajar dengan Topik Kurikulum Merdeka",
+    organizer: "Ditjen GTK KEMDIKBUDRISTEK",
+    year: "2023",
+    hours: 30,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_14",
+    type: "Diklat",
+    title: "Diklat Nasional \"Cepat dan Mudah Kuasai AI: Pemanfaatan Quizizz dalam Pembelajaran Menuju Kelas Masa Depan\"",
+    organizer: "Belajar Bersama, Guru Juara, edukarya",
+    year: "2023",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_15",
+    type: "Diklat",
+    title: "Diklat Nasional \"Era Digital Guru: Artificial Intelligence sebagai Solusi Administrasi Pendidikan\"",
+    organizer: "Belajar Bersama, Edu Karya, dan UNNES",
+    year: "2023",
+    hours: 40,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_16",
+    type: "Pelatihan",
+    title: "Menulis Buku Praktik Baik pada Kurikulum Merdeka",
+    organizer: "Universitas Pendidikan Mandalika (UNDIKMA) dan P4I",
+    year: "2023",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_17",
+    type: "Bimtek",
+    title: "Bimtek \"Pentingnya Pendidikan Karakter dalam Membentuk Etika dan Moral Anak\"",
+    organizer: "Guru Juara",
+    year: "2023",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_18",
+    type: "Pelatihan",
+    title: "Metode Dahsyat dan Mudah: Optimalkan Penggunaan Teknologi Artificial Intelligence dalam Pendidikan",
+    organizer: "Belajar Bersama, Ruang Temu Guru, edukarya",
+    year: "2023",
+    hours: 40,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_19",
+    type: "Seminar/Webinar",
+    title: "MEMBANGUN PROFIL PELAJAR PANCASILA DALAM PARADIGMA KURIKULUM MERDEKA",
+    organizer: "Program Studi Magister Pendidikan Ilmu Pendidikan Sosial UBHI",
+    year: "2023",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_20",
+    type: "Pelatihan",
+    title: "Penerapan Pembelajaran Kreatif & Inovatif dalam Era Kurikulum Merdeka",
+    organizer: "Belajar Era Digital",
+    year: "2023",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_21",
+    type: "Pelatihan",
+    title: "PENYUSUNAN MODUL AJAR PENGGANTI RENCANA PELAKSANAAN PEMBELAJARAN (RPP)",
+    organizer: "LPPPG Jawa Timur dan DIKPORA Kab. Tulungagung",
+    year: "2023",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_22",
+    type: "Pelatihan",
+    title: "Pelatihan Mandiri dalam Platform Merdeka Mengajar dengan topik Profil Pelajar Pancasila",
+    organizer: "Ditjen GTK Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi",
+    year: "2022",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_23",
+    type: "Pelatihan",
+    title: "Pelatihan Mandiri dalam Platform Merdeka Mengajar dengan topik Perencanaan Pembelajaran SD/Paket A",
+    organizer: "Ditjen GTK Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi",
+    year: "2022",
+    hours: 30,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_24",
+    type: "Workshop",
+    title: "Workshop Nasional Guru Inovatif Indonesia dengan Tema \"Kurikulum Merdeka Belajar\"",
+    organizer: "Pusat Pengembangan Pendidikan dan Pelatihan Indonesia (P4I)",
+    year: "2022",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_25",
+    type: "Diklat",
+    title: "Diklat Nasional Tingkatkan Kualitas Pembelajaran Melalui Karya Inovatif Guru",
+    organizer: "e-Guru.id",
+    year: "2022",
+    hours: 40,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_26",
+    type: "Workshop",
+    title: "Lokakarya Zenru: Kupas Tuntas Kurikulum Merdeka",
+    organizer: "ZENIUS UNTUK GURU",
+    year: "2022",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_27",
+    type: "Diklat",
+    title: "Diklat Nasional Dampak Besar Kurikulum Merdeka dalam Fleksibilitas Pembelajaran",
+    organizer: "e-Guru.id",
+    year: "2022",
+    hours: 40,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_28",
+    type: "Pelatihan",
+    title: "Langkah Mudah Membuat Publikasi Ilmiah untuk Kenaikan Pangkat Guru",
+    organizer: "GuruJuara.com",
+    year: "2022",
+    hours: 40,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_29",
+    type: "Pelatihan",
+    title: "Pelatihan Quizizz School Teacher Untuk Pembelajaran",
+    organizer: "Ikatan Guru Indonesia Kab. Lebong dan Quizizz",
+    year: "2022",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_30",
+    type: "Diklat",
+    title: "Diklat Nasional Menguatkan Kompetensi Guru Menyongsong Kurikulum Paradigma Baru",
+    organizer: "e-Guru.id",
+    year: "2022",
+    hours: 40,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_31",
+    type: "Seminar/Webinar",
+    title: "Bedah Kurikulum Prototipe sebagai Pilihan Kurikulum dalam Rangka Pemulihan Pembelajaran",
+    organizer: "e-Guru.id",
+    year: "2022",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_32",
+    type: "Bimtek",
+    title: "Bimbingan Teknis Pemanfaatan Aplikasi SIGUTAJAR (Sistem Informasi Guru Tulungagung Belajar) dalam Pembelajaran bagi Guru SD Kabupaten Tulungagung",
+    organizer: "Dinas Pendidikan Pemuda dan Olahraga Kab. Tulungagung",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_33",
+    type: "Bimtek",
+    title: "Bimbingan Teknis Aplikasi SIGUTAJAR (Sistem Informasi Guru Tulungagung Belajar) Bagi Guru SD Kabupaten Tulungagung",
+    organizer: "Dinas Pendidikan Pemuda dan Olah Raga Kab. Tulungagung",
+    year: "2021",
+    hours: 16,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_34",
+    type: "Pelatihan",
+    title: "Pelatihan YouTube Pembelajaran dengan tema \"Seribu Konten YouTube Pendidikan Untuk Indonesia\" Kelas Dasar/Pemula",
+    organizer: "Omah Guru Inovatif",
+    year: "2021",
+    hours: 34,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_35",
+    type: "Seminar/Webinar",
+    title: "\"MERDEKA BELAJAR\" MELALUI MODEL PEMBELAJARAN BLENDED LEARNING",
+    organizer: "LPPPG JATIM & DIKPORA KAB. TULUNGAGUNG",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_36",
+    type: "Pelatihan",
+    title: "Pelatihan Mengajar di Mana Saja dengan Akun Pembelajaran",
+    organizer: "Google Master Trainer - GTK Kemdikbud",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_37",
+    type: "Pelatihan",
+    title: "Digitalisasi Sekolah",
+    organizer: "Direktorat Selolah Dasar",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_38",
+    type: "Pelatihan",
+    title: "Pelatihan Guru Cerdas Lewat Pembelajaran Seimbang",
+    organizer: "ZENIUS UNTUK GURU",
+    year: "2021",
+    hours: 64,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_39",
+    type: "Pelatihan",
+    title: "Pelatihan Google Workspace for Education",
+    organizer: "PGRI Kabupaten Tulungagung",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_40",
+    type: "Seminar/Webinar",
+    title: "Webinar Digitalisasi Sekolah bersama Guru-Guru BK se-Indonesia dengan Implementasi sistem Automatic Skill Analysis (ASA)",
+    organizer: "KOMNASDIK JATIM",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_41",
+    type: "Pelatihan",
+    title: "Pelatihan Persiapan Pembelajaran Tatap Muka Terbatas TA 2021/2022 SERI 2: Mempersiapkan Siswa untuk PTM Terbatas",
+    organizer: "ruangkelas by Ruangguru",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_42",
+    type: "Pelatihan",
+    title: "MAHIR AKM ALA ZENIUS",
+    organizer: "ZENIUS UNTUK GURU",
+    year: "2021",
+    hours: 64,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_43",
+    type: "Seminar/Webinar",
+    title: "Webinar Pendidikan Nasional dengan Tema \"Tantangan Membentuk Generasi Terbaik Bangsa di Era Perubahan\"",
+    organizer: "INDONESIAN YOUTH EDUCATION MOVEMENT",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_44",
+    type: "Pelatihan",
+    title: "Pelatihan Membuat Video Animasi Pembelajaran Kelas Pemula menggunakan Renderforest",
+    organizer: "Omah Guru Inovatif",
+    year: "2021",
+    hours: 34,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_45",
+    type: "Workshop",
+    title: "Webinar dan Workshop Nasional \"Strategi Pembelajaran di Sekolah Dasar Berbasis 3M\"",
+    organizer: "Prodi PGSD Fakultas Pendidikan Ilmu Sosial Bahasa dan Sastra IPI Garut",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_46",
+    type: "Pelatihan",
+    title: "KELAS ONLINE DIGITAL INTERACTIVE LEARNING “10 Hari Membuat Media Pembelajaran Interaktif”",
+    organizer: "GREENLEAF BELAJAR",
+    year: "2020",
+    hours: 64,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_47",
+    type: "Pelatihan",
+    title: "Pelatihan Google Suite for Education",
+    organizer: "Google Master Trainer - GTK Kemdikbud",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_48",
+    type: "Bimtek",
+    title: "Bimbingan Teknis (Bimtek) Program Guru Belajar Seri Asesmen Kompetensi Minimum Kementerian Pendidikan dan Kebudayaan",
+    organizer: "Kementerian Pendidikan dan Kebudayaan",
+    year: "2021",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_49",
+    type: "Workshop",
+    title: "Webinar dan Pelatihan Berbagi Inspirasi Karya Edukasi dengan Tema “Inovasi Pembelajaran”",
+    organizer: "UNIVERSITAS AMIKOM PURWOKERTO",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_50",
+    type: "Pelatihan",
+    title: "Bikin Quiz Praktis dan Kreatif dengan Quizizz",
+    organizer: "Kanal Pelatihan IGI (Ikatan Guru Indonesia) SAMISANOV",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_51",
+    type: "Seminar/Webinar",
+    title: "Model Pembelajaran di Sekolah Dasar pada Masa Pandemi Covid 19",
+    organizer: "Dinas Pendidikan Pemuda dan Olahraga (UPASP Kecamatan Karangrejo)",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_52",
+    type: "Seminar/Webinar",
+    title: "Webinar Strategi Peningkatan Kualitas Pembelajaran Anak pada Masa Pandemi",
+    organizer: "Jurusan KSDP, FIP, Universitas Negeri Malang",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_53",
+    type: "Seminar/Webinar",
+    title: "Webinar Pengelolaan Pembelajaran Daring yang Efektif untuk Siswa SD/MI",
+    organizer: "STITNU Al Hikmah Mojokerto",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_54",
+    type: "Pelatihan",
+    title: "Peningkatan Kompetensi Guru dalam Pembelajaran Berbasis TIK (PembaTIK) Tahun 2020 Level Literasi",
+    organizer: "Pustekkom Kementerian Pendidikan dan Kebudayaan",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_55",
+    type: "Seminar/Webinar",
+    title: "Ngobrol Santai Matematika \"Inovasi Pembelajaran Kini dan Nanti\"",
+    organizer: "Prodi Pendidikan Matematika FKIP Universitas Majalengka",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_56",
+    type: "Seminar/Webinar",
+    title: "Orang Tua Paham Kesehatan, Generasi Maju",
+    organizer: "Komisi Nasional Pendidikan Provinsi Jawa Timur",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_57",
+    type: "Pelatihan",
+    title: "Pembuatan APK Pembelajaran 3D",
+    organizer: "Kanal Pelatihan IGI (Ikatan Guru Indonesia) SAMISANOV",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_58",
+    type: "Bimtek",
+    title: "Bimbingan Teknis Penyusunan Rencana Pelaksanaan Pembelajaran (RPP) Daring dalam Situasi Pembelajaran New Normal",
+    organizer: "Ikatan Guru Indonesia (IGI) Kab. Takalar Prov. Sulawesi Selatan",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_59",
+    type: "Seminar/Webinar",
+    title: "Webinar Sesi 4 PGRI Tulungagung “Strategi Menyongsong Tahun Pelajaran Baru di Masa Pandemi”",
+    organizer: "Persatuan Guru Republik Indonesia (PGRI) Kabupaten Tulungagung",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_60",
+    type: "Seminar/Webinar",
+    title: "Webinar Pengenalan Lingkungan Sekolah Secara Virtual: Menyambut Tahun Ajaran Baru, Semua Terlibat Menjadi Hebat",
+    organizer: "Pusat Penguatan Karakter Kementerian Pendidikan dan Kebudayaan",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_61",
+    type: "Seminar/Webinar",
+    title: "Insersi Kurikulum Pendidikan Anti Korupsi Implementasi Peraturan Gubernur Jawa Timur No. 83 Tahun 2019 tentang Penyelenggaraan Pendidikan Anti Korupsi",
+    organizer: "Dinas Pendidikan Provinsi Jawa Timur",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_62",
+    type: "Seminar/Webinar",
+    title: "New Normal: Belajar Modern Berbasis Digital",
+    organizer: "Acer Indonesia",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_63",
+    type: "Seminar/Webinar",
+    title: "Pengelolaan Pendidikan Anak di Era New Normal",
+    organizer: "Lakpesdam PC NU Demak",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_64",
+    type: "Seminar/Webinar",
+    title: "STRATEGI MERANCANG PJJ TEMATIK TANPA INTERNET BAGI GURU SD KELAS RENDAH DAN TINGGI",
+    organizer: "Direktorat Jenderal Guru dan Tenaga Kependidikan",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_65",
+    type: "Seminar/Webinar",
+    title: "Merdeka Belajar Berkualitas",
+    organizer: "Indonesia Bermutu",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_66",
+    type: "Seminar/Webinar",
+    title: "Penguatan Pendidikan Karakter Dengan Kesadaran Jiwa Pancasila",
+    organizer: "Komisi Nasional Pendidikan Provinsi Jawa Timur",
+    year: "2020",
+    hours: 8,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_67",
+    type: "Seminar/Webinar",
+    title: "Mengenal Teknologi VR untuk Pembelajaran",
+    organizer: "Ikatan Guru Indonesia (IGI) Kabupaten Gresik",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_68",
+    type: "Seminar/Webinar",
+    title: "Webinar Berkarya, Berbagi, dan Menginspirasi",
+    organizer: "IGI Kab. Sintang dan Universitas AMIKOM Purwokerto",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_69",
+    type: "Seminar/Webinar",
+    title: "Menjadi Guru di Rumah, Menjadi Guru dari Rumah",
+    organizer: "LP2M Universitas Negeri Malang",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_70",
+    type: "Pelatihan",
+    title: "Merancang Game PowerPoint Interaktif untuk Kelas Online",
+    organizer: "Kanal Pelatihan IGI (Ikatan Guru Indonesia) SAMISANOV",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_71",
+    type: "Seminar/Webinar",
+    title: "Salam, Sapa, dan Diskusi (SSD) bersama ITJEN KEMENDIKBUD RI dengan tema “Perjuangan Pendidik dalam Menghadapi Masa Pandemi”",
+    organizer: "INDONESIAN YOUTH EDUCATION MOVEMENT",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_72",
+    type: "Seminar/Webinar",
+    title: "Tantangan Pembelajaran di Masa New Normal",
+    organizer: "Ikatan Alumni UM Wiayah Surabaya, Sidoarjo, dan Gresik",
+    year: "2020",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_73",
+    type: "Seminar/Webinar",
+    title: "Webinar Sesi 1 PGRI Tulungagung Pembelajaran Daring dengan Office 365",
+    organizer: "Persatuan Guru Republik Indonesia (PGRI) Kabupaten Tulungagung",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_74",
+    type: "Diklat",
+    title: "Diklat Matematika Tingkat Pendidikan Dasar",
+    organizer: "Yayasan Surya Nusa Cendekia Yogyakarta",
+    year: "2020",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_75",
+    type: "Bimtek",
+    title: "Penguatan Implementasi Kurikulum 2013 Jenjang Sekolah Dasar",
+    organizer: "Dinas Pendidikan Pemuda dan Olahraga Kab. Tulungagung",
+    year: "2019",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_76",
+    type: "Pelatihan",
+    title: "Pelatihan Dasar (LATSAR) Calon Pegawai Negeri Sipil Golongan III",
+    organizer: "Badan Pengembangan Sumber Daya Manusia Provinsi Jawa Timur",
+    year: "2019",
+    hours: 511,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_77",
+    type: "Pelatihan",
+    title: "Pembekalan Calon Pegawai Negeri Sipil Tahun 2018",
+    organizer: "Badan Kepegawaian Daerah Kabupaten Tulungagung",
+    year: "2019",
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_78",
+    type: "Bimtek",
+    title: "BIMBINGAN TEKNIS IMPLEMENTASI KURIKULUM 2013 BAGI GURU KELAS 2 DAN 5 UNTUK PEMBELAJARAN DI SEKOLAH DASAR",
+    organizer: "UPT DINAS PENDIDIKAN PEMUDA DAN OLAH RAGA KECAMATAN KARANGREJO",
+    year: "2019",
+    hours: 32,
+    showOnFront: false
+  },
+  {
+    id: "dev_pdf_79",
+    type: "Pelatihan",
+    title: "STRATEGI PENYUSUNAN KARYA TULIS YANG ACCEPTABLE QUALIFIED DAN KONSEP PENILAIAN KURIKULUM 2013",
+    organizer: "LEMBAGA PELATIHAN DAN PENGEMBANGAN PROFESI GURU PROVINSI JAWA TIMUR (LPPPG) DAN DINAS PENDIDIKAN KABUPATEN TULUNGAGUNG",
+    year: "2019",
+    hours: 32,
+    showOnFront: false
   }
 ];
 
@@ -513,6 +1169,7 @@ const INITIAL_SETTINGS: WebsiteSettings = {
     profil: true,
     pendidikan: true,
     karier: true,
+    tugasTambahan: true,
     pengembanganDiri: true,
     prestasi: true,
     karya: true,
@@ -526,6 +1183,22 @@ const INITIAL_SETTINGS: WebsiteSettings = {
     dokumen: true,
     artikel: true,
     kontak: true
+  },
+  pdfVisibility: {
+    profil: true,
+    pendidikan: true,
+    karier: true,
+    tugasTambahan: true,
+    pengembanganDiri: true,
+    prestasi: true,
+    karya: true,
+    inovasi: true,
+    bestPractice: true,
+    dampakSiswa: true,
+    kompetensi: true,
+    organisasi: true,
+    sertifikat: true,
+    dokumen: true
   }
 };
 
@@ -575,14 +1248,26 @@ class DatabaseService {
         if (parsed.settings && (parsed.settings.siteTitle === "Portofolio Guru Profesional" || !parsed.settings.siteTitle)) {
           parsed.settings.siteTitle = "Portofolio Digital Guru";
         }
+        
+        // Merge missing default development events (from PDF) to ensure they are loaded safely
+        const loadedEvents = parsed.developmentEvents || [];
+        const existingIds = new Set(loadedEvents.map((e: any) => e.id));
+        const missingEvents = DEFAULT_PORTFOLIO_DATA.developmentEvents.filter(e => !existingIds.has(e.id));
+        const mergedEvents = [...loadedEvents, ...missingEvents];
+
         // Ensure all collections are loaded and have correct keys
-        return {
+        const mergedData = {
           ...DEFAULT_PORTFOLIO_DATA,
           ...parsed,
+          developmentEvents: mergedEvents,
           profile: { ...DEFAULT_PORTFOLIO_DATA.profile, ...parsed.profile },
           additionalTasks: parsed.additionalTasks || DEFAULT_PORTFOLIO_DATA.additionalTasks || [],
           settings: { ...DEFAULT_PORTFOLIO_DATA.settings, ...parsed.settings }
         };
+
+        // Persist merged data back to local storage so it registers immediately
+        this.saveLocal(mergedData);
+        return mergedData;
       } catch (e) {
         console.error("Local storage corruption. Reseeding with default portfolio data.", e);
         this.saveLocal(DEFAULT_PORTFOLIO_DATA);
@@ -674,17 +1359,35 @@ class DatabaseService {
         "organizations", "gallery", "certificates", "documents", "articles", "contactMessages"
       ];
 
+      let devEventsChangedInFirestore = false;
       for (const entName of entities) {
         const snap = await getDoc(doc(db, "portfolio", entName));
         if (snap.exists()) {
-          const listData = snap.data()?.list;
+          let listData = snap.data()?.list;
           if (Array.isArray(listData)) {
+            if (entName === "developmentEvents") {
+              const existingIds = new Set(listData.map((e: any) => e.id));
+              const missingEvents = DEFAULT_PORTFOLIO_DATA.developmentEvents.filter(e => !existingIds.has(e.id));
+              if (missingEvents.length > 0) {
+                listData = [...listData, ...missingEvents];
+                devEventsChangedInFirestore = true;
+              }
+            }
             (this.localData as any)[entName] = listData;
           }
         }
       }
 
       this.saveLocal(this.localData);
+
+      if (devEventsChangedInFirestore) {
+        console.log("Saving newly merged developmentEvents back to Firebase...");
+        try {
+          await setDoc(doc(db, "portfolio", "developmentEvents"), { list: this.localData.developmentEvents });
+        } catch (err) {
+          console.error("Failed to update merged developmentEvents in Firebase:", err);
+        }
+      }
       console.log("Loaded data from Firebase Firestore successfully.");
       return true;
     } catch (error) {
@@ -744,6 +1447,23 @@ class DatabaseService {
       list.push(item); // Add
     }
 
+    (this.localData as any)[entityKey] = list;
+    this.saveLocal(this.localData);
+
+    if (isFirebaseConnected && db) {
+      try {
+        await setDoc(doc(db, "portfolio", String(entityKey)), { list });
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `portfolio/${String(entityKey)}`);
+      }
+    }
+    return list;
+  }
+
+  async saveFullList<T extends { id: string }>(
+    entityKey: keyof Omit<PortfolioData, "profile" | "settings">,
+    list: T[]
+  ): Promise<T[]> {
     (this.localData as any)[entityKey] = list;
     this.saveLocal(this.localData);
 

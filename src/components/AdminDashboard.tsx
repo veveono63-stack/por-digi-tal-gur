@@ -8,14 +8,15 @@ import {
   Compass, Users, GraduationCap, Briefcase, FileCheck2, Award, 
   BookOpen, BookOpenCheck, TrendingUp, Globe, Image, FileText, 
   Mail, Settings, ShieldAlert, CheckCircle2, Trash2, Edit2, 
-  Plus, Search, Download, Upload, LogOut, Check, X, Sun, Moon, Eye, ClipboardList
+  Plus, Search, Download, Upload, LogOut, Check, X, Sun, Moon, Eye, ClipboardList,
+  ArrowUp, ArrowDown
 } from "lucide-react";
 import { PortfolioData, Profile, Education, Career, AdditionalTask, DevelopmentEvent, Achievement, 
   WorkAndPublication, Innovation, BestPractice, StudentImpact, TeacherCompetency, 
   Organization, Gallery, Certificate, Document, Article, WebsiteSettings 
 } from "../types";
 import { dbService } from "../dbService";
-import { formatDate } from "../utils";
+import { formatDate, getDirectImageUrl } from "../utils";
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -119,6 +120,25 @@ export default function AdminDashboard({
             />
           </div>
           <div className="space-y-1.5">
+            <label className="text-slate-300 font-bold">Tempat Lahir (Opsional)</label>
+            <input 
+              type="text" 
+              value={profile.birthPlace || ""} 
+              onChange={e => setProfile({ ...profile, birthPlace: e.target.value })}
+              placeholder="Contoh: Jakarta"
+              className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-slate-300 font-bold">Tanggal Lahir (Opsional)</label>
+            <input 
+              type="date" 
+              value={profile.birthDate || ""} 
+              onChange={e => setProfile({ ...profile, birthDate: e.target.value })}
+              className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
+            />
+          </div>
+          <div className="space-y-1.5">
             <label className="text-slate-300 font-bold">Gelar & Sertifikasi Singkat (Title)</label>
             <input 
               type="text" 
@@ -197,14 +217,31 @@ export default function AdminDashboard({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-slate-300 font-bold">Foto URL (Unsplash / Cloud Storage / Logo)</label>
-            <input 
-              type="text" 
-              required
-              value={profile.photoUrl} 
-              onChange={e => setProfile({ ...profile, photoUrl: e.target.value })}
-              className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
-            />
+            <label className="text-slate-300 font-bold">Foto URL (Unsplash / Google Drive / Foto Profil)</label>
+            <div className="flex items-center gap-3">
+              {profile.photoUrl && (
+                <img 
+                  src={getDirectImageUrl(profile.photoUrl)} 
+                  alt="Pratinjau Foto" 
+                  className="w-12 h-12 object-cover rounded-lg border border-slate-700 shrink-0 bg-slate-950"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=350";
+                  }}
+                  referrerPolicy="no-referrer"
+                />
+              )}
+              <input 
+                type="text" 
+                required
+                value={profile.photoUrl} 
+                onChange={e => setProfile({ ...profile, photoUrl: e.target.value })}
+                placeholder="Contoh: /nama-file.jpg atau link Google Drive"
+                className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50 text-sm"
+              />
+            </div>
+            <p className="text-[11px] text-slate-400">
+              * Tips: Bisa pakai file yang diupload ke folder <strong>public/</strong> (contoh: <code>/foto-saya.jpg</code>) atau link <strong>Google Drive</strong>.
+            </p>
           </div>
           <div className="space-y-1.5">
             <label className="text-slate-300 font-bold">Alamat Lengkap</label>
@@ -335,7 +372,34 @@ export default function AdminDashboard({
 
   // 2. Settings Editor (Website Settings & Visibilities)
   const SettingsEditor = () => {
-    const [settings, setSettings] = useState<WebsiteSettings>({ ...portfolioData.settings });
+    const [settings, setSettings] = useState<WebsiteSettings>(() => {
+      const initial = { ...portfolioData.settings };
+      if (!initial.menuVisibility) {
+        initial.menuVisibility = {} as any;
+      }
+      if (initial.menuVisibility.tugasTambahan === undefined) {
+        initial.menuVisibility.tugasTambahan = true;
+      }
+      if (!initial.pdfVisibility) {
+        initial.pdfVisibility = {
+          profil: true,
+          pendidikan: true,
+          karier: true,
+          tugasTambahan: true,
+          pengembanganDiri: true,
+          prestasi: true,
+          karya: true,
+          inovasi: true,
+          bestPractice: true,
+          dampakSiswa: true,
+          kompetensi: true,
+          organisasi: true,
+          sertifikat: true,
+          dokumen: true
+        };
+      }
+      return initial;
+    });
 
     const handleSave = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -352,6 +416,46 @@ export default function AdminDashboard({
       const vis = { ...settings.menuVisibility } as any;
       vis[key] = !vis[key];
       setSettings({ ...settings, menuVisibility: vis });
+    };
+
+    const togglePdf = (key: string) => {
+      const vis = { ...(settings.pdfVisibility || {}) } as any;
+      vis[key] = !vis[key];
+      setSettings({ ...settings, pdfVisibility: vis });
+    };
+
+     const menuLabels: Record<string, string> = {
+      beranda: "Beranda / Banner Utama",
+      profil: "Profil & Biodata Lengkap",
+      pendidikan: "Riwayat Pendidikan",
+      karier: "Pengalaman Karier",
+      tugasTambahan: "Tugas Tambahan",
+      pengembanganDiri: "Pengembangan Diri / Diklat",
+      prestasi: "Prestasi & Penghargaan",
+      karya: "Karya Inovasi dan Publikasi",
+      bestPractice: "Best Practice STAR",
+      dampakSiswa: "Dampak Peserta Didik",
+      kompetensi: "Kompetensi Guru",
+      organisasi: "Organisasi & Profesi",
+      galeri: "Galeri Dokumentasi Foto",
+      dokumen: "Lain-Lain",
+      artikel: "Artikel & Blog",
+      kontak: "Hubungi / Formulir Kontak",
+    };
+
+    const pdfLabels: Record<string, string> = {
+      profil: "Profil & Bio Profesional",
+      pendidikan: "Riwayat Pendidikan",
+      karier: "Pengalaman Karier",
+      tugasTambahan: "Tugas Tambahan",
+      pengembanganDiri: "Pengembangan Diri / Diklat",
+      prestasi: "Prestasi & Penghargaan",
+      karya: "Karya Inovasi dan Publikasi",
+      bestPractice: "Best Practice STAR",
+      dampakSiswa: "Dampak Peserta Didik",
+      kompetensi: "Kompetensi Guru",
+      organisasi: "Organisasi & Keanggotaan",
+      dokumen: "Daftar Tautan Lain-Lain",
     };
 
     return (
@@ -391,21 +495,41 @@ export default function AdminDashboard({
           ></textarea>
         </div>
 
-        {/* Visibility Toggles */}
+        {/* Website Visibility Toggles */}
         <div className="space-y-3 pt-4 border-t border-slate-800">
-          <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 block font-mono">Visibilitas Menu Utama (Auto-Hide Aktif)</span>
-          <p className="text-[10px] text-slate-500">Tentukan modul mana yang ingin Anda tampilkan secara publik. Kosongkan jika ingin menyembunyikan sementara.</p>
+          <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 block font-mono">Visibilitas Menu Utama (Halaman Website)</span>
+          <p className="text-[10px] text-slate-500">Tentukan modul mana saja yang ingin Anda tampilkan secara publik di website (Public View).</p>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 text-xs">
-            {Object.keys(settings.menuVisibility).map((key) => (
-              <label key={key} className="flex items-center space-x-2.5 p-2 bg-slate-800/40 rounded-lg cursor-pointer hover:bg-slate-800 border border-slate-800 transition">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+            {Object.keys(menuLabels).map((key) => (
+              <label key={key} className="flex items-center space-x-2.5 p-2.5 bg-slate-800/40 rounded-xl cursor-pointer hover:bg-slate-800 border border-slate-800/80 transition">
                 <input 
                   type="checkbox" 
-                  checked={(settings.menuVisibility as any)[key]} 
+                  checked={!!(settings.menuVisibility as any)[key]} 
                   onChange={() => toggleMenu(key)}
                   className="rounded border-slate-700 text-amber-500 focus:ring-amber-500/20 bg-slate-900"
                 />
-                <span className="capitalize font-medium text-slate-300">{key.replace(/([A-Z])/g, ' $1')}</span>
+                <span className="font-semibold text-slate-300">{menuLabels[key]}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* PDF Printing Visibility Toggles */}
+        <div className="space-y-3 pt-4 border-t border-slate-800">
+          <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 block font-mono">Visibilitas Hasil Cetak PDF</span>
+          <p className="text-[10px] text-slate-500">Tentukan modul mana saja yang ingin Anda cetak dan tampilkan pada lembar hasil ekspor PDF / Cetak CV.</p>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+            {Object.keys(pdfLabels).map((key) => (
+              <label key={key} className="flex items-center space-x-2.5 p-2.5 bg-slate-800/40 rounded-xl cursor-pointer hover:bg-slate-800 border border-slate-800/80 transition">
+                <input 
+                  type="checkbox" 
+                  checked={settings.pdfVisibility ? !!(settings.pdfVisibility as any)[key] : true} 
+                  onChange={() => togglePdf(key)}
+                  className="rounded border-slate-700 text-amber-500 focus:ring-amber-500/20 bg-slate-900"
+                />
+                <span className="font-semibold text-slate-300">{pdfLabels[key]}</span>
               </label>
             ))}
           </div>
@@ -432,7 +556,7 @@ export default function AdminDashboard({
   }: { 
     entityKey: keyof Omit<PortfolioData, "profile" | "settings" | "contactMessages">; 
     title: string; 
-    fields: { key: string; label: string; type: "text" | "number" | "select" | "textarea"; options?: string[]; optional?: boolean }[];
+    fields: { key: string; label: string; type: "text" | "number" | "select" | "textarea" | "checkbox"; options?: string[]; optional?: boolean }[];
     blankItem: any;
   }) => {
     const list = (portfolioData[entityKey] || []) as any[];
@@ -466,6 +590,36 @@ export default function AdminDashboard({
       }
     };
 
+    const handleMoveUp = async (index: number) => {
+      if (index <= 0) return;
+      const newList = [...list];
+      const temp = newList[index];
+      newList[index] = newList[index - 1];
+      newList[index - 1] = temp;
+      try {
+        await dbService.saveFullList(entityKey, newList);
+        onRefreshData();
+        triggerToast("Urutan berhasil dinaikkan!");
+      } catch (err) {
+        triggerToast("Gagal mengubah urutan.", true);
+      }
+    };
+
+    const handleMoveDown = async (index: number) => {
+      if (index >= list.length - 1) return;
+      const newList = [...list];
+      const temp = newList[index];
+      newList[index] = newList[index + 1];
+      newList[index + 1] = temp;
+      try {
+        await dbService.saveFullList(entityKey, newList);
+        onRefreshData();
+        triggerToast("Urutan berhasil diturunkan!");
+      } catch (err) {
+        triggerToast("Gagal mengubah urutan.", true);
+      }
+    };
+
     // Filter list based on search term
     const filteredList = list.filter((item: any) => {
       if (!searchTerm) return true;
@@ -483,42 +637,97 @@ export default function AdminDashboard({
               {isAdding ? `Tambah ${title}` : `Edit ${title}`}
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-left">
-              {fields.map((f) => (
-                <div key={f.key} className={`space-y-1.5 text-left ${f.type === "textarea" ? "sm:col-span-2" : ""}`}>
-                  <label className="text-slate-300 font-bold block">
-                    {f.label} {f.optional && <span className="text-[10px] text-slate-500 font-normal italic">(Opsional)</span>}
-                  </label>
-                  {f.type === "textarea" ? (
-                    <textarea 
-                      required={!f.optional}
-                      rows={3}
-                      value={editorItem[f.key] || ""} 
-                      onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
-                      className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
-                    />
-                  ) : f.type === "select" ? (
-                    <select
-                      required={!f.optional}
-                      value={editorItem[f.key] || ""}
-                      onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
-                      className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
-                    >
-                      <option value="">-- Pilih {f.label} --</option>
-                      {f.options?.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input 
-                      type={f.type} 
-                      required={!f.optional}
-                      value={editorItem[f.key] || ""} 
-                      onChange={e => setEditorItem({ ...editorItem, [f.key]: f.type === "number" ? parseFloat(e.target.value) : e.target.value })}
-                      className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
-                    />
-                  )}
-                </div>
-              ))}
+              {fields.map((f) => {
+                const isCheckbox = f.type === "checkbox";
+                return (
+                  <div key={f.key} className={`space-y-1.5 text-left ${f.type === "textarea" || isCheckbox ? "sm:col-span-2" : ""}`}>
+                    {!isCheckbox && (
+                      <label className="text-slate-300 font-bold block">
+                        {f.label} {f.optional && <span className="text-[10px] text-slate-500 font-normal italic">(Opsional)</span>}
+                      </label>
+                    )}
+                    {f.type === "textarea" ? (
+                      <textarea 
+                        required={!f.optional}
+                        rows={3}
+                        value={editorItem[f.key] || ""} 
+                        onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
+                        className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
+                      />
+                    ) : f.type === "checkbox" ? (
+                      <label className="flex items-center space-x-3 bg-slate-800/40 p-3 rounded-lg border border-slate-800 cursor-pointer hover:bg-slate-800 transition mt-2">
+                        <input 
+                          type="checkbox"
+                          checked={!!editorItem[f.key]} 
+                          onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.checked })}
+                          className="rounded border-slate-700 text-amber-500 focus:ring-amber-500/20 bg-slate-900 h-5 w-5 cursor-pointer shrink-0"
+                        />
+                        <div className="text-left">
+                          <span className="text-slate-200 font-bold block">{f.label}</span>
+                          <span className="text-[10px] text-slate-500">Jika diaktifkan, data akan otomatis muncul langsung di halaman utama.</span>
+                        </div>
+                      </label>
+                    ) : (entityKey === "gallery" && f.key === "category") ? (
+                      <div className="space-y-2">
+                        <select
+                          value={(() => {
+                            const val = (editorItem[f.key] || "").trim();
+                            if (!val) return "";
+                            const defaultOpts = ["Mengajar", "Seminar", "Workshop", "Literasi", "Pramuka", "AGP", "Guru Penggerak"];
+                            const existingOpts = Array.from(new Set(list.map(item => (item.category || "").trim()).filter(Boolean)));
+                            const allOpts = Array.from(new Set([...defaultOpts, ...existingOpts]));
+                            const found = allOpts.find(opt => opt.toLowerCase() === val.toLowerCase());
+                            return found || "";
+                          })()}
+                          onChange={e => {
+                            if (e.target.value) {
+                              setEditorItem({ ...editorItem, [f.key]: e.target.value });
+                            }
+                          }}
+                          className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50 text-xs"
+                        >
+                          <option value="">-- Pilih Kategori yang Ada --</option>
+                          {(() => {
+                            const defaultOpts = ["Mengajar", "Seminar", "Workshop", "Literasi", "Pramuka", "AGP", "Guru Penggerak"];
+                            const existingOpts = Array.from(new Set(list.map(item => (item.category || "").trim()).filter(Boolean)));
+                            return Array.from(new Set([...defaultOpts, ...existingOpts])).map(opt => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ));
+                          })()}
+                        </select>
+                        <input 
+                          type="text"
+                          required={!f.optional}
+                          placeholder="Atau ketik kategori baru di sini..."
+                          value={editorItem[f.key] || ""} 
+                          onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
+                          className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50 text-xs"
+                        />
+                      </div>
+                    ) : f.type === "select" ? (
+                      <select
+                        required={!f.optional}
+                        value={editorItem[f.key] || ""}
+                        onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
+                        className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
+                      >
+                        <option value="">-- Pilih {f.label} --</option>
+                        {f.options?.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input 
+                        type={f.type} 
+                        required={!f.optional}
+                        value={editorItem[f.key] || ""} 
+                        onChange={e => setEditorItem({ ...editorItem, [f.key]: f.type === "number" ? parseFloat(e.target.value) : e.target.value })}
+                        className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="flex justify-end space-x-2 pt-2 text-xs">
@@ -559,70 +768,120 @@ export default function AdminDashboard({
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px] font-bold">
+                  <th className="py-2.5 pl-3 w-12 text-center">No.</th>
                   <th className="py-2.5">
                     {entityKey === "additionalTasks" ? "Nama Tugas Tambahan" : "Arsip Data"}
                   </th>
                   <th className="py-2.5">Rincian Singkat</th>
-                  <th className="py-2.5 text-right">Aksi</th>
+                  <th className="py-2.5 text-right pr-3">Prioritas / Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
-                {filteredList.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-900/40 transition">
-                    <td className="py-3">
-                      <span className="font-bold text-white block">
-                        {item.taskName || item.title || item.name || item.position || item.level}
-                      </span>
-                      {item.type && <span className="text-[10px] font-mono text-amber-500 font-bold">{item.type}</span>}
-                    </td>
-                    <td className="py-3 text-slate-400 max-w-sm truncate">
-                      {item.organizer || item.institution || item.publisher || item.problem || item.situation || item.description || "-"}
-                    </td>
-                    <td className="py-3 text-right">
-                      <div className="inline-flex space-x-2">
-                        <button
-                          onClick={() => { setEditorItem(item); setIsAdding(false); }}
-                          className="p-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition"
-                          title="Edit"
-                        >
-                          <Edit2 size={12} />
-                        </button>
-                        {deleteConfirmId === item.id ? (
-                          <div className="inline-flex items-center space-x-1 animate-pulse">
+                {filteredList.map((item) => {
+                  const originalIndex = list.indexOf(item);
+                  return (
+                    <tr key={item.id} className="hover:bg-slate-900/40 transition">
+                      <td className="py-3 pl-3 text-center font-mono font-bold text-amber-500/90 text-xs">
+                        {originalIndex + 1}
+                      </td>
+                      <td className="py-3">
+                        <span className="font-bold text-white block">
+                          {item.taskName || item.title || item.name || item.position || item.level}
+                        </span>
+                        {item.type && (
+                          <div className="flex items-center space-x-2 mt-0.5">
+                            <span className="text-[10px] font-mono text-amber-500 font-bold">{item.type}</span>
+                            {item.showOnFront !== undefined && (
+                              <span className={`text-[8px] font-mono px-1.5 py-0.5 rounded font-bold border ${
+                                item.showOnFront 
+                                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+                                  : "bg-slate-800 text-slate-500 border-slate-700"
+                              }`}>
+                                {item.showOnFront ? "TAMPIL DI DEPAN" : "DISEMBUNYIKAN"}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-3 text-slate-400 max-w-sm truncate">
+                        {item.organizer || item.institution || item.publisher || item.problem || item.situation || item.description || "-"}
+                      </td>
+                      <td className="py-3 text-right pr-3">
+                        <div className="inline-flex space-x-2 items-center">
+                          {/* Reordering priority buttons */}
+                          <div className="flex space-x-1 border-r border-slate-800/60 pr-2 mr-1">
                             <button
-                              onClick={() => handleDelete(item.id)}
-                              className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] rounded transition-all"
-                              title="Konfirmasi Hapus"
+                              type="button"
+                              disabled={originalIndex === 0 || !!searchTerm}
+                              onClick={() => handleMoveUp(originalIndex)}
+                              className={`p-1 rounded transition ${
+                                originalIndex === 0 || !!searchTerm
+                                  ? "text-slate-600 cursor-not-allowed opacity-30" 
+                                  : "bg-slate-800/60 hover:bg-slate-800 text-amber-500 hover:text-amber-400"
+                              }`}
+                              title={!!searchTerm ? "Bersihkan pencarian untuk mengurutkan" : "Geser ke Atas (Prioritas Utama)"}
                             >
-                              Yakin?
+                              <ArrowUp size={12} />
                             </button>
                             <button
-                              onClick={() => setDeleteConfirmId(null)}
-                              className="p-1 bg-slate-800 text-slate-400 hover:text-white rounded"
-                              title="Batal"
+                              type="button"
+                              disabled={originalIndex === list.length - 1 || !!searchTerm}
+                              onClick={() => handleMoveDown(originalIndex)}
+                              className={`p-1 rounded transition ${
+                                originalIndex === list.length - 1 || !!searchTerm
+                                  ? "text-slate-600 cursor-not-allowed opacity-30" 
+                                  : "bg-slate-800/60 hover:bg-slate-800 text-amber-500 hover:text-amber-400"
+                              }`}
+                              title={!!searchTerm ? "Bersihkan pencarian untuk mengurutkan" : "Geser ke Bawah (Prioritas Akhir)"}
                             >
-                              <X size={10} />
+                              <ArrowDown size={12} />
                             </button>
                           </div>
-                        ) : (
+
                           <button
-                            onClick={() => {
-                              setDeleteConfirmId(item.id);
-                              setTimeout(() => setDeleteConfirmId(prev => prev === item.id ? null : prev), 4000);
-                            }}
-                            className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition"
-                            title="Hapus"
+                            onClick={() => { setEditorItem(item); setIsAdding(false); }}
+                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition"
+                            title="Edit"
                           >
-                            <Trash2 size={12} />
+                            <Edit2 size={12} />
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          {deleteConfirmId === item.id ? (
+                            <div className="inline-flex items-center space-x-1 animate-pulse">
+                              <button
+                                onClick={() => handleDelete(item.id)}
+                                className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] rounded transition-all"
+                                title="Konfirmasi Hapus"
+                              >
+                                Yakin?
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirmId(null)}
+                                className="p-1 bg-slate-800 text-slate-400 hover:text-white rounded"
+                                title="Batal"
+                              >
+                                <X size={10} />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setDeleteConfirmId(item.id);
+                                setTimeout(() => setDeleteConfirmId(prev => prev === item.id ? null : prev), 4000);
+                              }}
+                              className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition"
+                              title="Hapus"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {filteredList.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="py-6 text-center text-slate-500">
+                    <td colSpan={4} className="py-6 text-center text-slate-500">
                       Tidak ada arsip data {title} ditemukan.
                     </td>
                   </tr>
@@ -796,14 +1055,12 @@ export default function AdminDashboard({
               { id: "additionalTasks", label: "Tugas Tambahan", icon: ClipboardList },
               { id: "development", label: "Pengembangan Diri", icon: FileCheck2 },
               { id: "achievements", label: "Prestasi", icon: Award },
-              { id: "works", label: "Karya & Publikasi", icon: BookOpen },
-              { id: "innovations", label: "Inovasi Pembelajaran", icon: Compass },
+              { id: "works", label: "Karya Inovasi dan Publikasi", icon: BookOpen },
               { id: "bestPractices", label: "Best Practice STAR", icon: BookOpenCheck },
               { id: "studentImpact", label: "Dampak Siswa", icon: TrendingUp },
               { id: "organization", label: "Organisasi", icon: Globe },
               { id: "gallery", label: "Galeri Foto", icon: Image },
-              { id: "certificates", label: "Sertifikat", icon: Award },
-              { id: "documents", label: "Dokumen Kurikulum", icon: FileText },
+              { id: "documents", label: "Lain-Lain", icon: FileText },
               { id: "articles", label: "Artikel / Blog", icon: BookOpen },
               { id: "inbox", label: "Pesan Masuk", icon: Mail },
               { id: "settings", label: "Pengaturan Website", icon: Settings }
@@ -823,7 +1080,7 @@ export default function AdminDashboard({
           <div className="lg:col-span-9 space-y-6">
             
             {/* Standard Search Bar (Not shown in dashboard/settings/profile) */}
-            {["education", "career", "additionalTasks", "development", "achievements", "works", "innovations", "bestPractices", "studentImpact", "organization", "gallery", "certificates", "documents", "articles"].includes(activeTab) && (
+            {["education", "career", "additionalTasks", "development", "achievements", "works", "innovations", "bestPractices", "studentImpact", "organization", "gallery", "documents", "articles"].includes(activeTab) && (
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
                   <Search size={14} />
@@ -902,14 +1159,15 @@ export default function AdminDashboard({
               <ListEntityManager
                 entityKey="education"
                 title="Pendidikan"
-                blankItem={{ level: "S1", institution: "", major: "", startYear: "2020", endYear: "2024", description: "" }}
+                blankItem={{ level: "S1", institution: "", major: "", startYear: "2020", endYear: "2024", description: "", fileUrl: "" }}
                 fields={[
                   { key: "level", label: "Tingkatan", type: "select", options: ["SD", "SMP", "SMA", "S1", "S2", "S3", "PPG"] },
                   { key: "institution", label: "Nama Sekolah / Universitas", type: "text" },
                   { key: "major", label: "Jurusan / Program Studi", type: "text", optional: true },
                   { key: "startYear", label: "Tahun Masuk", type: "text" },
                   { key: "endYear", label: "Tahun Lulus", type: "text" },
-                  { key: "description", label: "Keterangan Tambahan", type: "textarea", optional: true }
+                  { key: "description", label: "Keterangan Tambahan", type: "textarea", optional: true },
+                  { key: "fileUrl", label: "Tautan Bukti Kelulusan / Ijazah (Opsional)", type: "text", optional: true }
                 ]}
               />
             )}
@@ -919,13 +1177,14 @@ export default function AdminDashboard({
               <ListEntityManager
                 entityKey="career"
                 title="Karier"
-                blankItem={{ position: "", institution: "", startYear: "2020", endYear: "Sekarang", description: "" }}
+                blankItem={{ position: "", institution: "", startYear: "2020", endYear: "Sekarang", description: "", fileUrl: "" }}
                 fields={[
                   { key: "position", label: "Jabatan Pekerjaan", type: "text" },
                   { key: "institution", label: "Nama Instansi / Sekolah", type: "text" },
                   { key: "startYear", label: "Tahun Mulai", type: "text" },
                   { key: "endYear", label: "Tahun Selesai / Sekarang", type: "text" },
-                  { key: "description", label: "Keterangan Tugas / Kontribusi (Opsional)", type: "textarea", optional: true }
+                  { key: "description", label: "Keterangan Tugas / Kontribusi (Opsional)", type: "textarea", optional: true },
+                  { key: "fileUrl", label: "Tautan Bukti SK / Kontrak Kerja (Opsional)", type: "text", optional: true }
                 ]}
               />
             )}
@@ -952,14 +1211,15 @@ export default function AdminDashboard({
               <ListEntityManager
                 entityKey="developmentEvents"
                 title="Pengembangan Diri"
-                blankItem={{ type: "Workshop", title: "", organizer: "", date: new Date().toISOString().split("T")[0], hours: 32, certificateUrl: "" }}
+                blankItem={{ type: "Workshop", title: "", organizer: "", year: new Date().getFullYear().toString(), hours: 32, certificateUrl: "", showOnFront: true }}
                 fields={[
-                  { key: "type", label: "Kategori Kegiatan", type: "select", options: ["Workshop", "Webinar", "Seminar", "Diklat", "Pelatihan", "Sertifikasi", "Narasumber"] },
+                  { key: "type", label: "Kategori Kegiatan", type: "select", options: ["Workshop", "Seminar/Webinar", "Diklat", "Bimtek", "Pelatihan", "Sertifikasi", "Narasumber"] },
                   { key: "title", label: "Nama Seminar / Pelatihan", type: "text" },
                   { key: "organizer", label: "Penyelenggara Resmi", type: "text" },
-                  { key: "date", label: "Tanggal Pelaksanaan", type: "text" },
+                  { key: "year", label: "Tahun Pelaksanaan", type: "text" },
                   { key: "hours", label: "Jumlah Jam Pelajaran (JP) (Opsional)", type: "number", optional: true },
-                  { key: "certificateUrl", label: "Tautan File Sertifikat (Opsional)", type: "text", optional: true }
+                  { key: "certificateUrl", label: "Tautan File Sertifikat (Opsional)", type: "text", optional: true },
+                  { key: "showOnFront", label: "Tampilkan di Halaman Utama", type: "checkbox", optional: true }
                 ]}
               />
             )}
@@ -982,39 +1242,19 @@ export default function AdminDashboard({
               />
             )}
 
-            {/* TAB CONTENT: KARYA & PUBLIKASI */}
+            {/* TAB CONTENT: KARYA INOVASI DAN PUBLIKASI */}
             {activeTab === "works" && (
               <ListEntityManager
                 entityKey="works"
-                title="Karya & Publikasi"
+                title="Karya Inovasi dan Publikasi"
                 blankItem={{ type: "Buku", title: "", year: "2024", publisher: "", url: "", description: "" }}
                 fields={[
-                  { key: "type", label: "Jenis Karya", type: "select", options: ["Modul Ajar", "LKPD", "PTK", "Artikel", "Ebook", "Buku", "Media Pembelajaran", "Video Pembelajaran", "Best Practice"] },
-                  { key: "title", label: "Judul Karya / Publikasi", type: "text" },
+                  { key: "type", label: "Jenis Karya", type: "select", options: ["Karya Inovasi", "Modul Ajar", "LKPD", "PTK", "Artikel", "Ebook", "Buku", "Media Pembelajaran", "Video Pembelajaran", "Best Practice"] },
+                  { key: "title", label: "Judul Karya Inovasi / Publikasi", type: "text" },
                   { key: "year", label: "Tahun Terbit", type: "text" },
                   { key: "publisher", label: "Penerbit / Media Publikasi (Opsional)", type: "text", optional: true },
                   { key: "url", label: "Tautan/Link Karya (Opsional)", type: "text", optional: true },
                   { key: "description", label: "Ringkasan Singkat Karya (Opsional)", type: "textarea", optional: true }
-                ]}
-              />
-            )}
-
-            {/* TAB CONTENT: INOVASI PEMBELAJARAN */}
-            {activeTab === "innovations" && (
-              <ListEntityManager
-                entityKey="innovations"
-                title="Inovasi Pembelajaran"
-                blankItem={{ name: "", logoIcon: "Compass", background: "", problem: "", solution: "", objective: "", implementation: "", impact: "", statsLabel: "Ketuntasan", statsValue: "95%" }}
-                fields={[
-                  { key: "name", label: "Nama Inovasi (Misal: CAKRA)", type: "text" },
-                  { key: "background", label: "Latar Belakang Inovasi", type: "textarea" },
-                  { key: "problem", label: "Permasalahan Pembelajaran", type: "textarea" },
-                  { key: "solution", label: "Solusi Pembelajaran", type: "textarea" },
-                  { key: "objective", label: "Tujuan Inovasi", type: "textarea" },
-                  { key: "implementation", label: "Cara Implementasi", type: "textarea" },
-                  { key: "impact", label: "Dampak Hasil Inovasi", type: "textarea" },
-                  { key: "statsLabel", label: "Label Statistik (Contoh: Kenaikan Nilai)", type: "text" },
-                  { key: "statsValue", label: "Nilai Statistik (Contoh: 90%)", type: "text" }
                 ]}
               />
             )}
@@ -1024,14 +1264,16 @@ export default function AdminDashboard({
               <ListEntityManager
                 entityKey="bestPractices"
                 title="Best Practice STAR"
-                blankItem={{ title: "", situation: "", challenge: "", action: "", reflection: "", impact: "" }}
+                blankItem={{ title: "", situation: "", challenge: "", action: "", reflection: "", impact: "", pdfUrl: "", videoUrl: "" }}
                 fields={[
                   { key: "title", label: "Judul Praktik Baik", type: "text" },
                   { key: "situation", label: "Situation (Situasi)", type: "textarea" },
                   { key: "challenge", label: "Challenge (Tantangan)", type: "textarea" },
                   { key: "action", label: "Action (Aksi Nyata)", type: "textarea" },
                   { key: "reflection", label: "Reflection (Refleksi)", type: "textarea" },
-                  { key: "impact", label: "Dampak / Hasil Akhir", type: "textarea" }
+                  { key: "impact", label: "Dampak / Hasil Akhir", type: "textarea" },
+                  { key: "pdfUrl", label: "Tautan Bukti Dokumen STAR (Opsional)", type: "text", optional: true },
+                  { key: "videoUrl", label: "Tautan Bukti Video Presentasi / Praktik (Opsional)", type: "text", optional: true }
                 ]}
               />
             )}
@@ -1041,12 +1283,13 @@ export default function AdminDashboard({
               <ListEntityManager
                 entityKey="studentImpacts"
                 title="Dampak Peserta Didik"
-                blankItem={{ title: "", initialCondition: "", intervention: "", finalCondition: "" }}
+                blankItem={{ title: "", initialCondition: "", intervention: "", finalCondition: "", fileUrl: "" }}
                 fields={[
                   { key: "title", label: "Judul Pembanding", type: "text" },
                   { key: "initialCondition", label: "Kondisi Awal (Sebelum)", type: "textarea" },
                   { key: "intervention", label: "Intervensi / Metode Guru", type: "textarea" },
-                  { key: "finalCondition", label: "Kondisi Akhir (Sesudah)", type: "textarea" }
+                  { key: "finalCondition", label: "Kondisi Akhir (Sesudah)", type: "textarea" },
+                  { key: "fileUrl", label: "Tautan Bukti Laporan Analisis Dampak / Nilai (Opsional)", type: "text", optional: true }
                 ]}
               />
             )}
@@ -1083,34 +1326,19 @@ export default function AdminDashboard({
               />
             )}
 
-            {/* TAB CONTENT: SERTIFIKAT */}
-            {activeTab === "certificates" && (
-              <ListEntityManager
-                entityKey="certificates"
-                title="Sertifikat"
-                blankItem={{ name: "", category: "Sertifikasi", number: "", issuer: "", date: new Date().toISOString().split("T")[0], fileUrl: "" }}
-                fields={[
-                  { key: "name", label: "Nama Sertifikat / Lisensi", type: "text" },
-                  { key: "category", label: "Kategori / Bidang", type: "text" },
-                  { key: "issuer", label: "Lembaga Penerbit", type: "text" },
-                  { key: "number", label: "Nomor Sertifikat (Opsional)", type: "text" },
-                  { key: "date", label: "Tanggal Terbit", type: "text" },
-                  { key: "fileUrl", label: "Tautan File Unduhan (Google Drive / PDF)", type: "text" }
-                ]}
-              />
-            )}
-
-            {/* TAB CONTENT: DOKUMEN */}
+            {/* TAB CONTENT: LAIN-LAIN */}
             {activeTab === "documents" && (
               <ListEntityManager
                 entityKey="documents"
-                title="Dokumen Resmi"
-                blankItem={{ name: "", category: "Modul Ajar", description: "", fileUrl: "", uploadDate: new Date().toISOString().split("T")[0] }}
+                title="Lain-Lain"
+                blankItem={{ name: "", category: "Sertifikat", description: "", fileUrl: "", uploadDate: new Date().toISOString().split("T")[0], linkType: "Tampilkan di Portfolio (PDF / Dokumen)" }}
                 fields={[
-                  { key: "name", label: "Nama Berkas Dokumen", type: "text" },
-                  { key: "category", label: "Kategori Dokumen", type: "text" },
-                  { key: "fileUrl", label: "Tautan File (PDF / GDrive)", type: "text" },
-                  { key: "description", label: "Ringkasan Singkat Dokumen", type: "textarea" }
+                  { key: "name", label: "Nama Berkas / Sertifikat / Tautan", type: "text" },
+                  { key: "category", label: "Kategori (Contoh: Sertifikat, SK, Dokumen, Hasil Karya)", type: "text" },
+                  { key: "linkType", label: "Jenis Tautan", type: "select", options: ["Tampilkan di Portfolio (PDF / Dokumen)", "Tampilkan di Portfolio (Website / Iframe)", "Buka di Tab Baru (Website)"] },
+                  { key: "fileUrl", label: "Tautan URL (PDF / Google Drive / Website)", type: "text" },
+                  { key: "description", label: "Keterangan / Nomor SK / Penerbit (Opsional)", type: "textarea", optional: true },
+                  { key: "uploadDate", label: "Tanggal Terbit / Unggah", type: "text" }
                 ]}
               />
             )}

@@ -1,0 +1,43 @@
+PANDUAN UPLOAD SERTIFIKAT & FOTO PORTFOLIO
+==========================================
+
+Folder ini (`/public`) adalah folder statis. Semua file yang diletakkan di dalam folder ini
+akan secara otomatis dapat diakses oleh aplikasi Anda secara langsung.
+
+Cara ini sangat cocok untuk menampilkan file PDF dan Foto (JPG, PNG, dll) agar tampil indah 
+sebagai pratinjau (preview) di website portofolio Anda tanpa terunduh otomatis.
+
+
+METODE 1: UPLOAD LANGSUNG DI AI STUDIO (Sangat Direkomendasikan)
+--------------------------------------------------------------
+1. Pada File Explorer di sebelah kiri Google AI Studio, Anda bisa melihat folder `public` ini.
+2. Unggah file Sertifikat PDF atau Foto Anda langsung ke dalam folder `public` ini 
+   (atau Anda bisa membuat subfolder di dalamnya seperti `public/sertifikat/` agar lebih rapi).
+3. Di Dashboard Admin, pada bagian tautan berkas/sertifikat, Anda cukup menuliskan path relatifnya:
+   - Jika file ditaruh langsung di `public`: `/nama-file.pdf` atau `/nama-file.png`
+   - Jika ditaruh di dalam subfolder: `/sertifikat/nama-file.pdf` atau `/sertifikat/nama-file.png`
+
+Catatan: Pastikan menulis garis miring di depan (`/`) dan nama file sesuai huruf besar/kecilnya.
+
+
+METODE 2: MENGGUNAKAN GOOGLE DRIVE (Mudah & Praktis)
+-------------------------------------------------
+Jika file Anda disimpan di Google Drive, Anda tidak perlu mengunduh dan mengunggahnya lagi:
+1. Klik kanan file PDF atau Foto Anda di Google Drive.
+2. Pilih "Bagikan" -> "Bagikan dengan orang lain".
+3. Pada akses umum, ubah menjadi "Siapa saja yang memiliki link" (Anyone with the link) sebagai "Pelihat" (Viewer).
+4. Salin link tersebut (Copy Link). Contoh format link:
+   `https://drive.google.com/file/d/1A2B3C.../view?usp=sharing`
+5. Tempel (paste) link tersebut langsung ke kolom Tautan Sertifikat di Dashboard Admin.
+6. Aplikasi akan secara otomatis mengubah link tersebut menjadi mode interaktif (embed/preview) 
+   sehingga pratinjau PDF dan Foto akan langsung tampil di dalam website Anda!
+
+
+METODE 3: TAUTAN EKSTERNAL / DIRECT LINK
+---------------------------------------
+Jika Anda meng-hosting gambar atau PDF Anda di platform eksternal (seperti Imgur, Cloud Storage, dll):
+- Pastikan Anda menggunakan tautan langsung (Direct Link) yang berakhiran ekstensi filenya:
+  - Contoh Gambar: `https://contoh.com/gambar-saya.png` atau `.jpg`
+  - Contoh PDF: `https://contoh.com/sertifikat-saya.pdf`
+- Aplikasi kami sudah dilengkapi pendeteksi otomatis untuk mengenali file gambar (.png, .jpg, .jpeg, .webp, .svg, .gif) 
+  dan file PDF (.pdf) dari internet untuk dirender langsung di dalam bingkai pratinjau yang indah!
