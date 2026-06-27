@@ -15,6 +15,7 @@ import PrintPreview from "./components/PrintPreview";
 
 export default function App() {
   const [portfolioData, setPortfolioData] = useState<PortfolioData>(dbService.getPortfolioData());
+  const [isLoading, setIsLoading] = useState<boolean>(isFirebaseConnected);
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     return localStorage.getItem("admin_session") === "true";
   });
@@ -49,9 +50,15 @@ export default function App() {
     // 1. Initial Load from Firebase if connected
     const loadFirebaseData = async () => {
       if (isFirebaseConnected) {
-        const success = await dbService.loadFromFirebase();
-        if (success) {
-          setPortfolioData(dbService.getPortfolioData());
+        try {
+          const success = await dbService.loadFromFirebase();
+          if (success) {
+            setPortfolioData(dbService.getPortfolioData());
+          }
+        } catch (e) {
+          console.error("Failed to load from Firebase:", e);
+        } finally {
+          setIsLoading(false);
         }
       }
     };
@@ -164,6 +171,16 @@ export default function App() {
     }
   };
 
+  // If loading data from Firebase, show beautiful loading spinner
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#070d19] text-white flex flex-col items-center justify-center space-y-4 font-sans">
+        <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-sm font-bold text-slate-400 animate-pulse">Menghubungkan & memuat portofolio...</p>
+      </div>
+    );
+  }
+
   // If Print View is active, render print page instead of main shell
   if (printView.active) {
     return (
@@ -176,7 +193,7 @@ export default function App() {
   }
 
   return (
-    <div className={`relative ${isDarkMode ? "dark" : "light"}`}>
+    <div className={`relative overflow-x-hidden ${isDarkMode ? "dark" : "light"}`}>
       {isAdmin && showAdminDashboard ? (
         <AdminDashboard
           portfolioData={portfolioData}

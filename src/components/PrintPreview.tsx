@@ -17,6 +17,8 @@ interface PrintPreviewProps {
 export default function PrintPreview({ data, onClose, printType }: PrintPreviewProps) {
   const { profile, education, career, additionalTasks = [], developmentEvents, achievements, works, innovations, organizations, settings } = data;
   const [paperSize, setPaperSize] = React.useState<"asli" | "A4" | "F4">("asli");
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [contentHeightMm, setContentHeightMm] = React.useState<number>(1200);
 
   const isIframe = React.useMemo(() => {
     try {
@@ -36,6 +38,26 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
     }
   }, [isIframe, paperSize]);
 
+  React.useEffect(() => {
+    const updateHeight = () => {
+      if (containerRef.current) {
+        const heightPx = containerRef.current.offsetHeight;
+        // Convert px to mm: (heightPx * 25.4) / 96, and add 3mm safety margins
+        const heightMm = Math.ceil((heightPx * 25.4) / 96) + 3;
+        setContentHeightMm(heightMm);
+      }
+    };
+    
+    updateHeight();
+    const timer = setTimeout(updateHeight, 600);
+    window.addEventListener('resize', updateHeight);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [paperSize, data]);
+
   const handleAction = () => {
     if (isIframe) {
       window.open(window.location.origin + "?print=" + printType, "_blank");
@@ -50,16 +72,45 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
         return `
           @media print {
             @page {
-              size: 210mm 4000mm;
-              margin: 15mm;
+              size: 237mm ${contentHeightMm}mm;
+              margin: 0;
             }
             body, html, #root {
               height: auto !important;
               background-color: white !important;
+              width: 896px !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            .print-sheet-container {
+              width: 896px !important;
+              max-width: 896px !important;
+              min-width: 896px !important;
+              padding: 32px !important;
+              margin: 0 !important;
+              border: none !important;
+              box-shadow: none !important;
+              background: white !important;
+              box-sizing: border-box !important;
             }
             .print-section {
               page-break-inside: auto !important;
               break-inside: auto !important;
+            }
+            .print-item {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+            tr {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+            thead {
+              display: table-header-group !important;
+            }
+            h2 {
+              page-break-after: avoid !important;
+              break-after: avoid !important;
             }
           }
         `;
@@ -68,15 +119,44 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
           @media print {
             @page {
               size: A4;
-              margin: 15mm;
+              margin: 1.5cm 1.2cm;
             }
             body, html, #root {
               height: auto !important;
               background-color: white !important;
+              width: 100% !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            .print-sheet-container {
+              width: 100% !important;
+              max-width: 100% !important;
+              min-width: 100% !important;
+              padding: 0 !important;
+              margin: 0 !important;
+              border: none !important;
+              box-shadow: none !important;
+              background: white !important;
+              box-sizing: border-box !important;
             }
             .print-section {
+              page-break-inside: auto !important;
+              break-inside: auto !important;
+            }
+            .print-item {
               page-break-inside: avoid !important;
               break-inside: avoid !important;
+            }
+            tr {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+            thead {
+              display: table-header-group !important;
+            }
+            h2 {
+              page-break-after: avoid !important;
+              break-after: avoid !important;
             }
           }
         `;
@@ -85,15 +165,44 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
           @media print {
             @page {
               size: 215mm 330mm;
-              margin: 15mm;
+              margin: 1.5cm 1.2cm;
             }
             body, html, #root {
               height: auto !important;
               background-color: white !important;
+              width: 100% !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            .print-sheet-container {
+              width: 100% !important;
+              max-width: 100% !important;
+              min-width: 100% !important;
+              padding: 0 !important;
+              margin: 0 !important;
+              border: none !important;
+              box-shadow: none !important;
+              background: white !important;
+              box-sizing: border-box !important;
             }
             .print-section {
+              page-break-inside: auto !important;
+              break-inside: auto !important;
+            }
+            .print-item {
               page-break-inside: avoid !important;
               break-inside: avoid !important;
+            }
+            tr {
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+            }
+            thead {
+              display: table-header-group !important;
+            }
+            h2 {
+              page-break-after: avoid !important;
+              break-after: avoid !important;
             }
           }
         `;
@@ -205,11 +314,11 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
       </div>
 
       {/* Sheet Container */}
-      <div className="max-w-4xl mx-auto border border-slate-200 p-8 shadow-md rounded bg-white print:border-0 print:p-0 print:shadow-none">
+      <div ref={containerRef} className="print-sheet-container max-w-4xl mx-auto border border-slate-200 p-8 shadow-md rounded bg-white print:border-0 print:p-8 print:shadow-none">
         
         {/* CV Header */}
         <div className="border-b-4 border-slate-900 pb-6 mb-6 flex justify-between items-start gap-4">
-          <div className="flex items-start space-x-4">
+          <div className="flex items-start space-x-4 print:flex-1">
             {profile.photoUrl && (
               <img
                 src={getDirectImageUrl(profile.photoUrl)}
@@ -218,26 +327,26 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
                 referrerPolicy="no-referrer"
               />
             )}
-            <div className="space-y-2 max-w-xl">
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">{profile.fullName}</h1>
-              <p className="text-base sm:text-lg font-bold text-amber-700">{profile.title}</p>
-              <p className="text-xs sm:text-sm font-medium text-slate-600">{profile.position} | {profile.workUnit}</p>
-              <p className="text-xs italic text-slate-500">"{profile.motto}"</p>
+            <div className="space-y-2 max-w-xl print:max-w-none print:flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 print:text-xl sm:print:text-2xl print:whitespace-nowrap print:overflow-hidden print:text-ellipsis">{profile.fullName}</h1>
+              <p className="text-base sm:text-lg font-bold text-amber-700 print:text-xs sm:print:text-sm print:whitespace-nowrap print:overflow-hidden print:text-ellipsis">{profile.title}</p>
+              <p className="text-xs sm:text-sm font-medium text-slate-600 print:text-[10px] sm:print:text-xs print:whitespace-nowrap print:overflow-hidden print:text-ellipsis">{profile.position} | {profile.workUnit}</p>
+              <p className="text-xs italic text-slate-500 print:text-[10px] sm:print:text-xs print:whitespace-nowrap print:overflow-hidden print:text-ellipsis">"{profile.motto}"</p>
             </div>
           </div>
           
-          <div className="text-right text-xs space-y-1 text-slate-600 border-l border-slate-200 pl-6 shrink-0">
-            <p className="flex items-center justify-end"><Mail size={12} className="mr-1.5" /> {profile.email}</p>
-            <p className="flex items-center justify-end"><Phone size={12} className="mr-1.5" /> {profile.phone}</p>
-            <p className="flex items-center justify-end"><MapPin size={12} className="mr-1.5" /> {profile.address || "Jakarta, Indonesia"}</p>
+          <div className="text-right text-xs space-y-1 text-slate-600 border-l border-slate-200 pl-6 shrink-0 print:text-[10px]">
+            <p className="flex items-center justify-end print:whitespace-nowrap"><Mail size={12} className="mr-1.5" /> {profile.email}</p>
+            <p className="flex items-center justify-end print:whitespace-nowrap"><Phone size={12} className="mr-1.5" /> {profile.phone}</p>
+            <p className="flex items-center justify-end print:whitespace-nowrap"><MapPin size={12} className="mr-1.5" /> {profile.address || "Jakarta, Indonesia"}</p>
             {(profile.birthPlace || profile.birthDate) && (
-              <p className="flex items-center justify-end">
+              <p className="flex items-center justify-end print:whitespace-nowrap">
                 <Calendar size={12} className="mr-1.5" />
                 Lahir: {profile.birthPlace || ""}{profile.birthPlace && profile.birthDate ? ", " : ""}{profile.birthDate ? formatDate(profile.birthDate) : ""}
               </p>
             )}
-            <p className="font-mono mt-2">NIP: {profile.nip || "-"}</p>
-            <p className="font-mono">Gol: {profile.rank || "-"}</p>
+            <p className="font-mono mt-2 print:whitespace-nowrap">NIP: {profile.nip || "-"}</p>
+            <p className="font-mono print:whitespace-nowrap">Gol: {profile.rank || "-"}</p>
           </div>
         </div>
 
@@ -260,7 +369,7 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
                 <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Riwayat Pendidikan</h2>
                 <div className="space-y-3">
                   {education.map((edu) => (
-                    <div key={edu.id} className="relative pl-3 border-l-2 border-slate-300">
+                    <div key={edu.id} className="relative pl-3 border-l-2 border-slate-300 print-item">
                       <div className="flex justify-between items-start">
                         <h3 className="text-xs font-bold text-slate-900">{edu.level} - {edu.institution}</h3>
                         <span className="text-[10px] font-mono text-slate-500 shrink-0">{edu.startYear}-{edu.endYear}</span>
@@ -279,7 +388,7 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
                 <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Pengalaman Karier</h2>
                 <div className="space-y-3">
                   {career.map((car) => (
-                    <div key={car.id} className="relative pl-3 border-l-2 border-slate-300">
+                    <div key={car.id} className="relative pl-3 border-l-2 border-slate-300 print-item">
                       <div className="flex justify-between items-start">
                         <h3 className="text-xs font-bold text-slate-900">{car.position}</h3>
                         <span className="text-[10px] font-mono text-slate-500 shrink-0">{car.startYear}-{car.endYear}</span>
@@ -301,7 +410,7 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Tugas Tambahan</h2>
             <div className="grid grid-cols-2 gap-4">
               {additionalTasks.map((task) => (
-                <div key={task.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded text-xs">
+                <div key={task.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded text-xs print-item">
                   <div className="flex justify-between items-start">
                     <span className="font-bold text-slate-900">{task.taskName}</span>
                     <span className="text-[9px] font-mono font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded uppercase shrink-0">{task.startYear} - {task.endYear}</span>
@@ -320,7 +429,7 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Prestasi & Penghargaan</h2>
             <div className="grid grid-cols-2 gap-4">
               {achievements.map((ach) => (
-                <div key={ach.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded text-xs">
+                <div key={ach.id} className="p-2.5 bg-slate-50 border border-slate-200 rounded text-xs print-item">
                   <div className="flex justify-between items-start">
                     <span className="font-bold text-slate-900">{ach.rank} {ach.title}</span>
                     <span className="text-[9px] font-mono font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded uppercase">{ach.level}</span>
@@ -363,7 +472,15 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
                           <td className="py-1.5 px-2 font-medium">{event.title}</td>
                           <td className="py-1.5 px-2 text-slate-500">{event.organizer}</td>
                           <td className="py-1.5 px-2 font-mono text-slate-500">{event.year || (event.date ? event.date.substring(0, 4) : "")}</td>
-                          <td className="py-1.5 px-2 text-right font-semibold">{event.hours ? `${event.hours} JP` : "-"}</td>
+                          <td className="py-1.5 px-2 text-right font-semibold">
+                            {(() => {
+                              const h = event.hours;
+                              if (h === undefined || h === null || isNaN(h)) {
+                                return "-";
+                              }
+                              return `${h} JP`;
+                            })()}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -388,7 +505,7 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">Karya Inovasi dan Publikasi</h2>
             <ul className="list-disc list-outside pl-5 space-y-2">
               {works.map((work) => (
-                <li key={work.id} className="text-xs text-slate-800">
+                <li key={work.id} className="text-xs text-slate-800 print-item">
                   <div>
                     <span className="font-bold">[{work.type}]</span> <span className="italic font-medium">"{work.title}"</span> — {work.publisher || "Publikasi Mandiri"}, {work.year}
                     {work.description && <p className="text-[10px] text-slate-500 mt-0.5">{work.description}</p>}
@@ -405,7 +522,7 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
             <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3 font-sans">Organisasi & Keanggotaan</h2>
             <div className="grid grid-cols-2 gap-3 text-xs">
               {organizations.map((org) => (
-                <div key={org.id} className="pl-3 border-l border-amber-500">
+                <div key={org.id} className="pl-3 border-l border-amber-500 print-item">
                   <span className="font-bold text-slate-950">{org.role}</span>
                   <p className="text-[10px] text-slate-700 font-medium">{org.name}</p>
                   <p className="text-[9px] text-slate-500 font-mono mt-0.5">{org.startYear} - {org.endYear}</p>
@@ -416,8 +533,8 @@ export default function PrintPreview({ data, onClose, printType }: PrintPreviewP
         )}
 
         {/* Certification declaration */}
-        <div className="mt-10 border-t border-slate-200 pt-6 text-center text-[10px] text-slate-500 flex justify-between items-center">
-          <p>Digenerasi secara otomatis melalui Portofolio Digital Guru SMAN 1 Jakarta</p>
+        <div className="mt-10 border-t border-slate-200 pt-6 text-center text-[10px] text-slate-500 flex justify-between items-center print-item">
+          <p>Digenerasi secara otomatis melalui Portofolio Digital Guru {profile.workUnit || "SD Negeri 2 Tanjungsari"}</p>
           <div className="text-right">
             <p className="font-bold text-slate-800">{profile.fullName}</p>
             <p className="font-mono">NIP. {profile.nip || "-"}</p>

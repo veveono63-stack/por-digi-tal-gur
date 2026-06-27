@@ -721,7 +721,12 @@ export default function AdminDashboard({
                         type={f.type} 
                         required={!f.optional}
                         value={editorItem[f.key] || ""} 
-                        onChange={e => setEditorItem({ ...editorItem, [f.key]: f.type === "number" ? parseFloat(e.target.value) : e.target.value })}
+                        onChange={e => {
+                          const val = f.type === "number" 
+                            ? (e.target.value === "" ? "" : (isNaN(parseFloat(e.target.value)) ? "" : parseFloat(e.target.value))) 
+                            : e.target.value;
+                          setEditorItem({ ...editorItem, [f.key]: val });
+                        }}
                         className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
                       />
                     )}

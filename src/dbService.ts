@@ -38,25 +38,25 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 // DUMMY DATA SEED
 // ----------------------------------------------------
 const INITIAL_PROFILE: Profile = {
-  fullName: "Budi Rahardjo, S.Pd., M.Pd.",
+  fullName: "Asnadi Kuncoro, S.Pd",
   title: "Guru Penggerak & Pendidik Ahli Madya",
-  position: "Guru Fisika / Pembina Olimpiade Sains",
-  workUnit: "SMAN 1 Jakarta",
+  position: "Guru Kelas / Pembina Kurikulum",
+  workUnit: "SD Negeri",
   motto: "Menuntun kodrat alam dan kodrat zaman peserta didik agar selamat dan bahagia setinggi-tingginya sebagai manusia dan anggota masyarakat.",
   photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=350", // High quality profile photo
   cvUrl: "",
   nip: "19840212 201001 1 005",
   nuptk: "4325762664130122",
   rank: "Pembina, IV/a",
-  bio: "Saya adalah seorang pendidik Fisika profesional yang berdedikasi tinggi dengan pengalaman lebih dari 15 tahun di bidang pendidikan menengah atas. Sebagai lulusan S2 Manajemen Pendidikan dan alumni Program Guru Penggerak Angkatan 5, saya berfokus pada inovasi pembelajaran berdiferensiasi, pemanfaatan teknologi pendidikan, dan pengimbasan praktik baik kepada komunitas belajar praktisi di DKI Jakarta.",
-  email: "budirahardjo@admin.sma.sch.id",
+  bio: "Saya adalah seorang pendidik profesional yang berdedikasi tinggi dengan pengalaman di bidang pendidikan dasar dan menengah. Sebagai alumni Program Guru Penggerak, saya berfokus pada inovasi pembelajaran berdiferensiasi, pemanfaatan teknologi pendidikan, dan pengimbasan praktik baik kepada komunitas belajar praktisi.",
+  email: "asnadi.kuncoro@admin.sch.id",
   phone: "+62 812-3456-7890",
-  address: "Jl. Budi Utomo No. 7, Sawah Besar, Jakarta Pusat, DKI Jakarta",
+  address: "Indonesia",
   socials: {
-    facebook: "https://facebook.com/budi.rahardjo.edu",
-    instagram: "https://instagram.com/budi_rahardjo_physics",
-    youtube: "https://youtube.com/c/BudiRahardjoPhysicsChannel",
-    tiktok: "https://www.tiktok.com/@budi_rahardjo_physics"
+    facebook: "https://facebook.com/asnadi.kuncoro",
+    instagram: "https://instagram.com/asnadi_kuncoro",
+    youtube: "https://youtube.com/c/AsnadiKuncoroChannel",
+    tiktok: "https://www.tiktok.com/@asnadi_kuncoro"
   }
 };
 
@@ -917,7 +917,7 @@ const INITIAL_WORKS: WorkAndPublication[] = [
     type: "Video Pembelajaran",
     title: "Konsep Gelombang Elektromagnetik dan Aplikasinya di Era Digital",
     year: "2024",
-    publisher: "Physics Channel Budi (YouTube)",
+    publisher: "Kanal Edukasi Asnadi (YouTube)",
     url: "https://youtube.com/watch?v=example",
     description: "Video animasi 3D yang menjelaskan sifat, spektrum, dan manfaat gelombang elektromagnetik.",
     coverUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=250"
@@ -1160,8 +1160,8 @@ const INITIAL_ARTICLES: Article[] = [
 
 const INITIAL_SETTINGS: WebsiteSettings = {
   siteTitle: "Portofolio Digital Guru",
-  seoTitle: "Budi Rahardjo, S.Pd., M.Pd. | Portofolio Guru Penggerak",
-  seoDescription: "Website resmi portofolio digital Budi Rahardjo, S.Pd., M.Pd. - Guru Penggerak & Pendidik Ahli Madya SMAN 1 Jakarta. CMS Media Arsip Kompetensi, Karya Inovatif, Best Practice, dan Personal Branding Profesional.",
+  seoTitle: "Portofolio - Asnadi Kuncoro, S.Pd",
+  seoDescription: "Website resmi portofolio digital Asnadi Kuncoro, S.Pd - Guru Penggerak & Pendidik Ahli Madya. CMS Media Arsip Kompetensi, Karya Inovatif, Best Practice, dan Personal Branding Profesional.",
   accentColor: "blue",
   isDarkMode: false,
   menuVisibility: {

@@ -216,7 +216,7 @@ export default function PublicView({
   });
 
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-200 selection:bg-amber-500 selection:text-slate-950 ${bgMain}`}>
+    <div className={`min-h-screen font-sans transition-colors duration-200 selection:bg-amber-500 selection:text-slate-950 overflow-x-hidden relative ${bgMain}`}>
       {isAdminLoggedIn && onReturnToAdmin && (
         <div className="bg-slate-900 border-b border-amber-500/20 py-2.5 px-4 text-center text-xs flex items-center justify-center gap-2 relative z-50 animate-fade-in font-medium text-white shadow-sm">
           <span className="flex h-2 w-2 relative">
@@ -748,11 +748,17 @@ export default function PublicView({
                               <span className="text-[9px] font-extrabold font-mono tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded uppercase">
                                 {event.type}
                               </span>
-                              {event.hours && (
-                                <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">
-                                  {event.hours} JP
-                                </span>
-                              )}
+                              {(() => {
+                                const h = event.hours;
+                                if (h === undefined || h === null || isNaN(h)) {
+                                  return null;
+                                }
+                                return (
+                                  <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">
+                                    {h} JP
+                                  </span>
+                                );
+                              })()}
                             </div>
                             <h4 className="text-xs font-bold text-white mt-2.5 line-clamp-2 group-hover:text-amber-400 transition-colors">{event.title}</h4>
                             <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">{event.organizer}</p>
@@ -1041,7 +1047,6 @@ export default function PublicView({
                     </div>
                     <div>
                       <h3 className="text-lg font-extrabold text-white uppercase tracking-wider">Lain-Lain</h3>
-                      <p className="text-xs text-slate-400">Unduhan Berkas Pendukung, SK, dan Sertifikat Lainnya</p>
                     </div>
                   </div>
 
