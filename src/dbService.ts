@@ -1160,8 +1160,8 @@ const INITIAL_ARTICLES: Article[] = [
 
 const INITIAL_SETTINGS: WebsiteSettings = {
   siteTitle: "Portofolio Digital Guru",
-  seoTitle: "Portofolio - Asnadi Kuncoro, S.Pd",
-  seoDescription: "Website resmi portofolio digital Asnadi Kuncoro, S.Pd - Guru Penggerak & Pendidik Ahli Madya. CMS Media Arsip Kompetensi, Karya Inovatif, Best Practice, dan Personal Branding Profesional.",
+  seoTitle: "Portofolio Guru",
+  seoDescription: "Website resmi portofolio digital guru. CMS Media Arsip Kompetensi, Karya Inovatif, Best Practice, dan Personal Branding Profesional.",
   accentColor: "blue",
   isDarkMode: false,
   menuVisibility: {
@@ -1202,23 +1202,46 @@ const INITIAL_SETTINGS: WebsiteSettings = {
   }
 };
 
+const EMPTY_PROFILE: Profile = {
+  fullName: "",
+  title: "",
+  position: "",
+  workUnit: "",
+  motto: "",
+  photoUrl: "",
+  cvUrl: "",
+  nip: "",
+  nuptk: "",
+  rank: "",
+  bio: "",
+  email: "",
+  phone: "",
+  address: "",
+  socials: {
+    facebook: "",
+    instagram: "",
+    youtube: "",
+    tiktok: ""
+  }
+};
+
 const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
-  profile: INITIAL_PROFILE,
-  education: INITIAL_EDUCATION,
-  career: INITIAL_CAREER,
-  additionalTasks: INITIAL_ADDITIONAL_TASKS,
-  developmentEvents: INITIAL_EVENTS,
-  achievements: INITIAL_ACHIEVEMENTS,
-  works: INITIAL_WORKS,
-  innovations: INITIAL_INNOVATIONS,
-  bestPractices: INITIAL_BEST_PRACTICES,
-  studentImpacts: INITIAL_IMPACTS,
-  competencies: INITIAL_COMPETENCIES,
-  organizations: INITIAL_ORGANIZATIONS,
-  gallery: INITIAL_GALLERY,
-  certificates: INITIAL_CERTIFICATES,
-  documents: INITIAL_DOCUMENTS,
-  articles: INITIAL_ARTICLES,
+  profile: EMPTY_PROFILE,
+  education: [],
+  career: [],
+  additionalTasks: [],
+  developmentEvents: [],
+  achievements: [],
+  works: [],
+  innovations: [],
+  bestPractices: [],
+  studentImpacts: [],
+  competencies: [],
+  organizations: [],
+  gallery: [],
+  certificates: [],
+  documents: [],
+  articles: [],
   contactMessages: [],
   settings: INITIAL_SETTINGS
 };
@@ -1249,19 +1272,13 @@ class DatabaseService {
           parsed.settings.siteTitle = "Portofolio Digital Guru";
         }
         
-        // Merge missing default development events (from PDF) to ensure they are loaded safely
-        const loadedEvents = parsed.developmentEvents || [];
-        const existingIds = new Set(loadedEvents.map((e: any) => e.id));
-        const missingEvents = DEFAULT_PORTFOLIO_DATA.developmentEvents.filter(e => !existingIds.has(e.id));
-        const mergedEvents = [...loadedEvents, ...missingEvents];
-
         // Ensure all collections are loaded and have correct keys
         const mergedData = {
           ...DEFAULT_PORTFOLIO_DATA,
           ...parsed,
-          developmentEvents: mergedEvents,
+          developmentEvents: parsed.developmentEvents || [],
           profile: { ...DEFAULT_PORTFOLIO_DATA.profile, ...parsed.profile },
-          additionalTasks: parsed.additionalTasks || DEFAULT_PORTFOLIO_DATA.additionalTasks || [],
+          additionalTasks: parsed.additionalTasks || [],
           settings: { ...DEFAULT_PORTFOLIO_DATA.settings, ...parsed.settings }
         };
 
@@ -1359,20 +1376,11 @@ class DatabaseService {
         "organizations", "gallery", "certificates", "documents", "articles", "contactMessages"
       ];
 
-      let devEventsChangedInFirestore = false;
       for (const entName of entities) {
         const snap = await getDoc(doc(db, "portfolio", entName));
         if (snap.exists()) {
           let listData = snap.data()?.list;
           if (Array.isArray(listData)) {
-            if (entName === "developmentEvents") {
-              const existingIds = new Set(listData.map((e: any) => e.id));
-              const missingEvents = DEFAULT_PORTFOLIO_DATA.developmentEvents.filter(e => !existingIds.has(e.id));
-              if (missingEvents.length > 0) {
-                listData = [...listData, ...missingEvents];
-                devEventsChangedInFirestore = true;
-              }
-            }
             (this.localData as any)[entName] = listData;
           }
         }
@@ -1380,14 +1388,6 @@ class DatabaseService {
 
       this.saveLocal(this.localData);
 
-      if (devEventsChangedInFirestore) {
-        console.log("Saving newly merged developmentEvents back to Firebase...");
-        try {
-          await setDoc(doc(db, "portfolio", "developmentEvents"), { list: this.localData.developmentEvents });
-        } catch (err) {
-          console.error("Failed to update merged developmentEvents in Firebase:", err);
-        }
-      }
       console.log("Loaded data from Firebase Firestore successfully.");
       return true;
     } catch (error) {
