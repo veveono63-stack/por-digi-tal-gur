@@ -1,0 +1,299 @@
+{
+  "entities": {
+    "Profile": {
+      "title": "Profile",
+      "description": "Teacher biography and personal professional details",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "title": { "type": "string" },
+        "position": { "type": "string" },
+        "workUnit": { "type": "string" },
+        "motto": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "cvUrl": { "type": "string" },
+        "nip": { "type": "string" },
+        "nuptk": { "type": "string" },
+        "rank": { "type": "string" },
+        "bio": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" }
+      },
+      "required": ["fullName", "position", "workUnit"]
+    },
+    "Education": {
+      "title": "Education",
+      "description": "Education timeline record",
+      "type": "object",
+      "properties": {
+        "level": { "type": "string", "enum": ["SD", "SMP", "SMA", "S1", "S2", "S3"] },
+        "institution": { "type": "string" },
+        "major": { "type": "string" },
+        "startYear": { "type": "string" },
+        "endYear": { "type": "string" }
+      },
+      "required": ["level", "institution", "startYear", "endYear"]
+    },
+    "Career": {
+      "title": "Career",
+      "description": "Work history timeline record",
+      "type": "object",
+      "properties": {
+        "position": { "type": "string" },
+        "institution": { "type": "string" },
+        "startYear": { "type": "string" },
+        "endYear": { "type": "string" }
+      },
+      "required": ["position", "institution", "startYear", "endYear"]
+    },
+    "DevelopmentEvent": {
+      "title": "DevelopmentEvent",
+      "description": "Teacher continuous professional development activity",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["Workshop", "Webinar", "Seminar", "Diklat", "Pelatihan", "Sertifikasi", "Narasumber"] },
+        "title": { "type": "string" },
+        "organizer": { "type": "string" },
+        "date": { "type": "string" },
+        "hours": { "type": "number" }
+      },
+      "required": ["type", "title", "organizer", "date"]
+    },
+    "Achievement": {
+      "title": "Achievement",
+      "description": "Professional awards or student accomplishments managed by teacher",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "rank": { "type": "string" },
+        "level": { "type": "string", "enum": ["Sekolah", "Kecamatan", "Kabupaten", "Provinsi", "Nasional", "Internasional"] },
+        "year": { "type": "string" },
+        "organizer": { "type": "string" }
+      },
+      "required": ["title", "rank", "level", "year"]
+    },
+    "WorkAndPublication": {
+      "title": "WorkAndPublication",
+      "description": "Created educational content or scholarly publication",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["Modul Ajar", "LKPD", "PTK", "Artikel", "Ebook", "Buku", "Media Pembelajaran", "Video Pembelajaran", "Best Practice"] },
+        "title": { "type": "string" },
+        "year": { "type": "string" }
+      },
+      "required": ["type", "title", "year"]
+    },
+    "Innovation": {
+      "title": "Innovation",
+      "description": "Teaching and learning methodology innovations",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "logoIcon": { "type": "string" },
+        "background": { "type": "string" },
+        "problem": { "type": "string" },
+        "solution": { "type": "string" },
+        "objective": { "type": "string" },
+        "implementation": { "type": "string" },
+        "impact": { "type": "string" }
+      },
+      "required": ["name", "background", "problem", "solution"]
+    },
+    "BestPractice": {
+      "title": "BestPractice",
+      "description": "Best practice report following STAR pattern",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "situation": { "type": "string" },
+        "challenge": { "type": "string" },
+        "action": { "type": "string" },
+        "reflection": { "type": "string" },
+        "impact": { "type": "string" }
+      },
+      "required": ["title", "situation", "challenge", "action", "reflection", "impact"]
+    },
+    "StudentImpact": {
+      "title": "StudentImpact",
+      "description": "Before/after impact on students",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "initialCondition": { "type": "string" },
+        "intervention": { "type": "string" },
+        "finalCondition": { "type": "string" }
+      },
+      "required": ["title", "initialCondition", "intervention", "finalCondition"]
+    },
+    "Competency": {
+      "title": "Competency",
+      "description": "Four pillars of Indonesian teacher competency score",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "score": { "type": "number" },
+        "description": { "type": "string" }
+      },
+      "required": ["name", "score", "description"]
+    },
+    "Organization": {
+      "title": "Organization",
+      "description": "Professional organizations and leadership record",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "startYear": { "type": "string" },
+        "endYear": { "type": "string" }
+      },
+      "required": ["name", "role", "startYear", "endYear"]
+    },
+    "Gallery": {
+      "title": "Gallery",
+      "description": "Professional teacher gallery portfolio photos",
+      "type": "object",
+      "properties": {
+        "category": { "type": "string", "enum": ["Mengajar", "Seminar", "Workshop", "Literasi", "Pramuka", "AGP", "Guru Penggerak"] },
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["category", "title", "imageUrl"]
+    },
+    "Certificate": {
+      "title": "Certificate",
+      "description": "Professional course/webinar credentials",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "issuer": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["name", "category", "issuer", "date"]
+    },
+    "Document": {
+      "title": "Document",
+      "description": "Official documents, lesson plans, or learning materials",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "uploadDate": { "type": "string" }
+      },
+      "required": ["name", "category", "uploadDate"]
+    },
+    "Article": {
+      "title": "Article",
+      "description": "Professional journal or blog articles published by teacher",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "content": { "type": "string" },
+        "category": { "type": "string" },
+        "date": { "type": "string" },
+        "isVisible": { "type": "boolean" }
+      },
+      "required": ["title", "slug", "content", "category", "date"]
+    },
+    "ContactMessage": {
+      "title": "ContactMessage",
+      "description": "Messages from public visitors",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "date": { "type": "string" },
+        "isRead": { "type": "boolean" }
+      },
+      "required": ["name", "email", "subject", "message"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Website preferences and page visibilities",
+      "type": "object",
+      "properties": {
+        "siteTitle": { "type": "string" },
+        "seoTitle": { "type": "string" },
+        "seoDescription": { "type": "string" },
+        "accentColor": { "type": "string" },
+        "isDarkMode": { "type": "boolean" }
+      },
+      "required": ["siteTitle", "seoTitle", "seoDescription"]
+    }
+  },
+  "firestore": {
+    "/profile": {
+      "schema": "Profile",
+      "description": "Profile settings documents"
+    },
+    "/education": {
+      "schema": "Education",
+      "description": "Education background records"
+    },
+    "/career": {
+      "schema": "Career",
+      "description": "Career records"
+    },
+    "/development": {
+      "schema": "DevelopmentEvent",
+      "description": "Professional development events"
+    },
+    "/achievements": {
+      "schema": "Achievement",
+      "description": "Academic and professional achievements"
+    },
+    "/works": {
+      "schema": "WorkAndPublication",
+      "description": "Books, media and publications"
+    },
+    "/innovations": {
+      "schema": "Innovation",
+      "description": "Educational innovations"
+    },
+    "/bestPractices": {
+      "schema": "BestPractice",
+      "description": "Best practice reports"
+    },
+    "/studentImpact": {
+      "schema": "StudentImpact",
+      "description": "Student progress and impact records"
+    },
+    "/competency": {
+      "schema": "Competency",
+      "description": "Competency details"
+    },
+    "/organization": {
+      "schema": "Organization",
+      "description": "Leadership and professional organization records"
+    },
+    "/gallery": {
+      "schema": "Gallery",
+      "description": "Teaching activities photo gallery"
+    },
+    "/certificates": {
+      "schema": "Certificate",
+      "description": "Credentials and certificates"
+    },
+    "/documents": {
+      "schema": "Document",
+      "description": "Important documents list"
+    },
+    "/articles": {
+      "schema": "Article",
+      "description": "Articles and writings"
+    },
+    "/contact": {
+      "schema": "ContactMessage",
+      "description": "Contact messages list"
+    },
+    "/settings": {
+      "schema": "Settings",
+      "description": "CMS settings configurations"
+    }
+  }
+}

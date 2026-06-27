@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+/* Hide scrollbars but allow scrolling */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* 
+ * Light Mode Theme Overrides
+ * Seamlessly adapts dark-mode components into pristine, professional light-mode alternatives
+ */
+
+.light {
+  background-color: #f8fafc !important; /* bg-slate-50 */
+  color: #334155 !important; /* text-slate-700 */
+}
+
+/* Adjust card backgrounds, borders, and shadows in light mode */
+.light section,
+.light div.bg-\[\#0c1322\]\/85,
+.light div.bg-\[\#0b1220\]\/60,
+.light div.bg-\[\#0b1220\]\/80 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important; /* border-slate-200 */
+  color: #334155 !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
+}
+
+/* Adjust internal card and secondary background elements */
+.light div.bg-\[\#121c2e\],
+.light div.bg-\[\#121c2e\]\/40,
+.light div.bg-\[\#0c1524\],
+.light div.bg-slate-900 {
+  background-color: #f1f5f9 !important; /* bg-slate-100 */
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+
+/* Text and Headings high-contrast overrides */
+.light h1,
+.light h2,
+.light h3,
+.light h4,
+.light h5,
+.light h6,
+.light .text-white {
+  color: #0f172a !important; /* text-slate-900 */
+}
+
+.light p,
+.light .text-slate-100,
+.light .text-slate-200,
+.light .text-slate-300 {
+  color: #334155 !important; /* text-slate-700 */
+}
+
+.light .text-slate-400 {
+  color: #64748b !important; /* text-slate-500 */
+}
+
+/* Border color overrides */
+.light .border-slate-800,
+.light .border-slate-800\/80,
+.light .border-slate-800\/60,
+.light .border-slate-700,
+.light .divide-slate-800\/60,
+.light .divide-slate-800\/50,
+.light .border-b,
+.light .border-t {
+  border-color: #e2e8f0 !important;
+}
+
+/* Tables in light mode */
+.light table {
+  color: #334155 !important;
+}
+
+.light tr {
+  border-color: #e2e8f0 !important;
+}
+
+.light td {
+  color: #334155 !important;
+}
+
+.light th {
+  color: #475569 !important; /* text-slate-600 */
+  border-color: #e2e8f0 !important;
+}
+
+/* Forms, Inputs, Textareas, and Selects */
+.light input,
+.light textarea,
+.light select {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important; /* border-slate-300 */
+  color: #0f172a !important;
+}
+
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Utility classes and state-dependent elements */
+.light .bg-slate-900\/80,
+.light .bg-slate-950,
+.light .bg-slate-900,
+.light .bg-\[\#0b1220\] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+.light .hover\:bg-slate-800\/50:hover,
+.light .hover\:bg-slate-850:hover,
+.light .hover\:bg-slate-800:hover,
+.light .hover\:bg-slate-900:hover,
+.light .hover\:bg-slate-900\/40:hover {
+  background-color: #f1f5f9 !important;
+}
+
+.light .bg-slate-800,
+.light .bg-slate-850 {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}

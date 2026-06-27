@@ -1,0 +1,8 @@
+{
+  "name": "Portofolio Digital Guru",
+  "description": "Aplikasi CMS Portofolio Digital Guru profesional untuk arsip karier, pengembangan kompetensi, prestasi, inovasi pembelajaran, dan media personal branding.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
