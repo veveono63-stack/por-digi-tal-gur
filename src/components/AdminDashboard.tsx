@@ -564,6 +564,198 @@ export default function AdminDashboard({
     const [isAdding, setIsAdding] = useState(false);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
+    const [isBulkOpen, setIsBulkOpen] = useState(false);
+    const [isHapusSemuaConfirm, setIsHapusSemuaConfirm] = useState(false);
+    const [importMethod, setImportMethod] = useState<"append" | "overwrite">("append");
+    const [importError, setImportError] = useState<string | null>(null);
+    const [dragActive, setDragActive] = useState(false);
+
+    const handleHapusSemua = async () => {
+      try {
+        await dbService.saveFullList(entityKey, []);
+        onRefreshData();
+        setIsHapusSemuaConfirm(false);
+        triggerToast(`Berhasil mengosongkan semua data ${title}!`);
+      } catch (err) {
+        triggerToast("Gagal mengosongkan data.", true);
+      }
+    };
+
+    const handleDownloadCSVTemplate = () => {
+      const csvContent = "\ufeff" + 
+        "Kategori Kegiatan;Nama Seminar / Pelatihan;Penyelenggara Resmi;Tahun Pelaksanaan;Jumlah Jam Pelajaran (JP);Tautan File Sertifikat (Opsional);Tampilkan di Halaman Utama (true/false)\n" +
+        "Workshop;Workshop Implementasi Kurikulum Merdeka;Dinas Pendidikan Kabupaten Tulungagung;2025;32;https://drive.google.com/file/d/123/view;true\n" +
+        "Seminar/Webinar;Webinar Pemanfaatan Canva untuk Pembelajaran Kreatif;Kelompok Kerja Guru (KKG);2026;4;;true\n" +
+        "Diklat;Diklat Pembelajaran Berdiferensiasi dan Asesmen Efektif;Balai Besar Penjaminan Mutu Pendidikan (BBPMP);2025;32;https://drive.google.com/file/d/456/view;false";
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "template_impor_pengembangan_diri.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    const handleDownloadJSONTemplate = () => {
+      const templateObj = [
+        {
+          type: "Workshop",
+          title: "Workshop Implementasi Kurikulum Merdeka",
+          organizer: "Dinas Pendidikan Kabupaten Tulungagung",
+          year: "2025",
+          hours: 32,
+          certificateUrl: "https://drive.google.com/file/d/123/view",
+          showOnFront: true
+        },
+        {
+          type: "Seminar/Webinar",
+          title: "Webinar Pemanfaatan Canva untuk Pembelajaran Kreatif",
+          organizer: "Kelompok Kerja Guru (KKG)",
+          year: "2026",
+          hours: 4,
+          certificateUrl: "",
+          showOnFront: true
+        }
+      ];
+      const blob = new Blob([JSON.stringify(templateObj, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "template_impor_pengembangan_diri.json");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    const parseCSV = (text: string): string[][] => {
+      const lines: string[] = [];
+      let currentLine = "";
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+          currentLine += char;
+        } else if (char === '\n' && !inQuotes) {
+          lines.push(currentLine);
+          currentLine = "";
+        } else if (char === '\r') {
+          // Skip carriage return
+        } else {
+          currentLine += char;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+
+      if (lines.length <= 1) return [];
+
+      // Auto-detect delimiter: check header row for semicolon vs comma
+      const headerLine = lines[0];
+      const delimiter = headerLine.includes(";") ? ";" : ",";
+
+      const results: string[][] = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
+
+        const row: string[] = [];
+        let cell = "";
+        let inside = false;
+        for (let j = 0; j < line.length; j++) {
+          const c = line[j];
+          if (c === '"') {
+            inside = !inside;
+          } else if (c === delimiter && !inside) {
+            row.push(cell.trim().replace(/^"|"$/g, ''));
+            cell = "";
+          } else {
+            cell += c;
+          }
+        }
+        row.push(cell.trim().replace(/^"|"$/g, ''));
+
+        results.push(row);
+      }
+      return results;
+    };
+
+    const processImportFile = async (file: File) => {
+      setImportError(null);
+      try {
+        const text = await file.text();
+        let importedItems: any[] = [];
+        
+        if (file.name.endsWith(".json")) {
+          const parsed = JSON.parse(text);
+          if (Array.isArray(parsed)) {
+            importedItems = parsed;
+          } else {
+            throw new Error("File JSON harus berisi array objek.");
+          }
+        } else if (file.name.endsWith(".csv")) {
+          const parsedRows = parseCSV(text);
+          importedItems = parsedRows.map((row) => {
+            const typeRaw = (row[0] || "Workshop").trim();
+            const allowedTypes = ["Workshop", "Seminar/Webinar", "Diklat", "Bimtek", "Pelatihan", "Sertifikasi", "Narasumber"];
+            const type = allowedTypes.find(t => t.toLowerCase() === typeRaw.toLowerCase()) || "Workshop";
+            
+            const title = row[1] || "";
+            const organizer = row[2] || "";
+            const year = row[3] || new Date().getFullYear().toString();
+            const hoursRaw = row[4];
+            const hours = hoursRaw ? parseInt(hoursRaw.replace(/[^\d]/g, ''), 10) : undefined;
+            const certificateUrl = row[5] || "";
+            const showOnFront = row[6] ? row[6].toLowerCase().trim() === "true" : true;
+
+            return {
+              type,
+              title,
+              organizer,
+              year,
+              hours: isNaN(hours as number) ? undefined : hours,
+              certificateUrl,
+              showOnFront
+            };
+          });
+        } else {
+          throw new Error("Format file tidak didukung. Gunakan .csv atau .json");
+        }
+
+        const validItems = importedItems.filter(item => item && item.title && item.title.trim() !== "");
+        
+        if (validItems.length === 0) {
+          throw new Error("Tidak ada data valid yang ditemukan untuk diimpor. Pastikan Judul tidak kosong.");
+        }
+
+        const itemsWithIds = validItems.map((item, index) => ({
+          ...item,
+          id: item.id || `dev_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 5)}`
+        }));
+
+        let newList = [];
+        if (importMethod === "append") {
+          newList = [...list, ...itemsWithIds];
+        } else {
+          newList = itemsWithIds;
+        }
+
+        await dbService.saveFullList(entityKey, newList);
+        onRefreshData();
+        triggerToast(`Berhasil mengimpor ${itemsWithIds.length} data ${title}!`);
+      } catch (err: any) {
+        setImportError(err.message || "Gagal mengurai file.");
+        triggerToast("Gagal mengimpor file.", true);
+      }
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      await processImportFile(file);
+    };
+
     const handleSave = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!editorItem) return;
@@ -628,130 +820,135 @@ export default function AdminDashboard({
       );
     });
 
+    const renderForm = () => {
+      if (!editorItem) return null;
+      return (
+        <form onSubmit={handleSave} className="bg-slate-900 border border-amber-500/20 p-5 rounded-2xl space-y-4 shadow-xl text-left">
+          <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-500 pb-2 border-b border-slate-800">
+            {isAdding ? `Tambah ${title}` : `Edit ${title}`}
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-left">
+            {fields.map((f) => {
+              const isCheckbox = f.type === "checkbox";
+              return (
+                <div key={f.key} className={`space-y-1.5 text-left ${f.type === "textarea" || isCheckbox ? "sm:col-span-2" : ""}`}>
+                  {!isCheckbox && (
+                    <label className="text-slate-300 font-bold block">
+                      {f.label} {f.optional && <span className="text-[10px] text-slate-500 font-normal italic">(Opsional)</span>}
+                    </label>
+                  )}
+                  {f.type === "textarea" ? (
+                    <textarea 
+                      required={!f.optional}
+                      rows={3}
+                      value={editorItem[f.key] || ""} 
+                      onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
+                      className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
+                    />
+                  ) : f.type === "checkbox" ? (
+                    <label className="flex items-center space-x-3 bg-slate-800/40 p-3 rounded-lg border border-slate-800 cursor-pointer hover:bg-slate-800 transition mt-2">
+                      <input 
+                        type="checkbox"
+                        checked={!!editorItem[f.key]} 
+                        onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.checked })}
+                        className="rounded border-slate-700 text-amber-500 focus:ring-amber-500/20 bg-slate-900 h-5 w-5 cursor-pointer shrink-0"
+                      />
+                      <div className="text-left">
+                        <span className="text-slate-200 font-bold block">{f.label}</span>
+                        <span className="text-[10px] text-slate-500">Jika diaktifkan, data akan otomatis muncul langsung di halaman utama.</span>
+                      </div>
+                    </label>
+                  ) : (entityKey === "gallery" && f.key === "category") ? (
+                    <div className="space-y-2">
+                      <select
+                        value={(() => {
+                          const val = (editorItem[f.key] || "").trim();
+                          if (!val) return "";
+                          const defaultOpts = ["Mengajar", "Seminar", "Workshop", "Literasi", "Pramuka", "AGP", "Guru Penggerak"];
+                          const existingOpts = Array.from(new Set(list.map(item => (item.category || "").trim()).filter(Boolean)));
+                          const allOpts = Array.from(new Set([...defaultOpts, ...existingOpts]));
+                          const found = allOpts.find(opt => opt.toLowerCase() === val.toLowerCase());
+                          return found || "";
+                        })()}
+                        onChange={e => {
+                          if (e.target.value) {
+                            setEditorItem({ ...editorItem, [f.key]: e.target.value });
+                          }
+                        }}
+                        className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50 text-xs"
+                      >
+                        <option value="">-- Pilih Kategori yang Ada --</option>
+                        {(() => {
+                          const defaultOpts = ["Mengajar", "Seminar", "Workshop", "Literasi", "Pramuka", "AGP", "Guru Penggerak"];
+                          const existingOpts = Array.from(new Set(list.map(item => (item.category || "").trim()).filter(Boolean)));
+                          return Array.from(new Set([...defaultOpts, ...existingOpts])).map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ));
+                        })()}
+                      </select>
+                      <input 
+                        type="text"
+                        required={!f.optional}
+                        placeholder="Atau ketik kategori baru di sini..."
+                        value={editorItem[f.key] || ""} 
+                        onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
+                        className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50 text-xs"
+                      />
+                    </div>
+                  ) : f.type === "select" ? (
+                    <select
+                      required={!f.optional}
+                      value={editorItem[f.key] || ""}
+                      onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
+                      className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
+                    >
+                      <option value="">-- Pilih {f.label} --</option>
+                      {f.options?.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input 
+                      type={f.type} 
+                      required={!f.optional}
+                      value={editorItem[f.key] || ""} 
+                      onChange={e => {
+                        const val = f.type === "number" 
+                          ? (e.target.value === "" ? "" : (isNaN(parseFloat(e.target.value)) ? "" : parseFloat(e.target.value))) 
+                          : e.target.value;
+                        setEditorItem({ ...editorItem, [f.key]: val });
+                      }}
+                      className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-2 text-xs">
+            <button 
+              type="button"
+              onClick={() => { setEditorItem(null); setIsAdding(false); }}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition"
+            >
+              Batal
+            </button>
+            <button 
+              type="submit"
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg transition"
+            >
+              Simpan
+            </button>
+          </div>
+        </form>
+      );
+    };
+
     return (
       <div className="space-y-6">
         {/* Editor Modal / Panel */}
-        {editorItem && (
-          <form onSubmit={handleSave} className="bg-slate-900 border border-amber-500/20 p-5 rounded-2xl space-y-4 shadow-xl text-left">
-            <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-500 pb-2 border-b border-slate-800">
-              {isAdding ? `Tambah ${title}` : `Edit ${title}`}
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-left">
-              {fields.map((f) => {
-                const isCheckbox = f.type === "checkbox";
-                return (
-                  <div key={f.key} className={`space-y-1.5 text-left ${f.type === "textarea" || isCheckbox ? "sm:col-span-2" : ""}`}>
-                    {!isCheckbox && (
-                      <label className="text-slate-300 font-bold block">
-                        {f.label} {f.optional && <span className="text-[10px] text-slate-500 font-normal italic">(Opsional)</span>}
-                      </label>
-                    )}
-                    {f.type === "textarea" ? (
-                      <textarea 
-                        required={!f.optional}
-                        rows={3}
-                        value={editorItem[f.key] || ""} 
-                        onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
-                        className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
-                      />
-                    ) : f.type === "checkbox" ? (
-                      <label className="flex items-center space-x-3 bg-slate-800/40 p-3 rounded-lg border border-slate-800 cursor-pointer hover:bg-slate-800 transition mt-2">
-                        <input 
-                          type="checkbox"
-                          checked={!!editorItem[f.key]} 
-                          onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.checked })}
-                          className="rounded border-slate-700 text-amber-500 focus:ring-amber-500/20 bg-slate-900 h-5 w-5 cursor-pointer shrink-0"
-                        />
-                        <div className="text-left">
-                          <span className="text-slate-200 font-bold block">{f.label}</span>
-                          <span className="text-[10px] text-slate-500">Jika diaktifkan, data akan otomatis muncul langsung di halaman utama.</span>
-                        </div>
-                      </label>
-                    ) : (entityKey === "gallery" && f.key === "category") ? (
-                      <div className="space-y-2">
-                        <select
-                          value={(() => {
-                            const val = (editorItem[f.key] || "").trim();
-                            if (!val) return "";
-                            const defaultOpts = ["Mengajar", "Seminar", "Workshop", "Literasi", "Pramuka", "AGP", "Guru Penggerak"];
-                            const existingOpts = Array.from(new Set(list.map(item => (item.category || "").trim()).filter(Boolean)));
-                            const allOpts = Array.from(new Set([...defaultOpts, ...existingOpts]));
-                            const found = allOpts.find(opt => opt.toLowerCase() === val.toLowerCase());
-                            return found || "";
-                          })()}
-                          onChange={e => {
-                            if (e.target.value) {
-                              setEditorItem({ ...editorItem, [f.key]: e.target.value });
-                            }
-                          }}
-                          className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50 text-xs"
-                        >
-                          <option value="">-- Pilih Kategori yang Ada --</option>
-                          {(() => {
-                            const defaultOpts = ["Mengajar", "Seminar", "Workshop", "Literasi", "Pramuka", "AGP", "Guru Penggerak"];
-                            const existingOpts = Array.from(new Set(list.map(item => (item.category || "").trim()).filter(Boolean)));
-                            return Array.from(new Set([...defaultOpts, ...existingOpts])).map(opt => (
-                              <option key={opt} value={opt}>{opt}</option>
-                            ));
-                          })()}
-                        </select>
-                        <input 
-                          type="text"
-                          required={!f.optional}
-                          placeholder="Atau ketik kategori baru di sini..."
-                          value={editorItem[f.key] || ""} 
-                          onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
-                          className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50 text-xs"
-                        />
-                      </div>
-                    ) : f.type === "select" ? (
-                      <select
-                        required={!f.optional}
-                        value={editorItem[f.key] || ""}
-                        onChange={e => setEditorItem({ ...editorItem, [f.key]: e.target.value })}
-                        className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
-                      >
-                        <option value="">-- Pilih {f.label} --</option>
-                        {f.options?.map(opt => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input 
-                        type={f.type} 
-                        required={!f.optional}
-                        value={editorItem[f.key] || ""} 
-                        onChange={e => {
-                          const val = f.type === "number" 
-                            ? (e.target.value === "" ? "" : (isNaN(parseFloat(e.target.value)) ? "" : parseFloat(e.target.value))) 
-                            : e.target.value;
-                          setEditorItem({ ...editorItem, [f.key]: val });
-                        }}
-                        className="w-full py-2 px-3 text-white bg-slate-800 border border-slate-700 rounded-lg focus:outline-none focus:border-amber-500/50"
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="flex justify-end space-x-2 pt-2 text-xs">
-              <button 
-                type="button"
-                onClick={() => { setEditorItem(null); setIsAdding(false); }}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition"
-              >
-                Batal
-              </button>
-              <button 
-                type="submit"
-                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg transition"
-              >
-                Simpan
-              </button>
-            </div>
-          </form>
-        )}
+        {editorItem && isAdding && renderForm()}
 
         {/* Data List Table */}
         <div className="bg-[#0b1220]/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
@@ -769,6 +966,159 @@ export default function AdminDashboard({
             </button>
           </div>
 
+          {entityKey === "developmentEvents" && (
+            <div className="border border-slate-800 rounded-xl bg-slate-900/40 p-4 space-y-4 text-xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="font-extrabold text-amber-500 uppercase tracking-wider font-mono">Alat Massal (Bulk Tools)</span>
+                  <span className="text-[10px] text-slate-500">Impor, ekspor, atau hapus semua data sekaligus</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsBulkOpen(!isBulkOpen)}
+                  className="px-2.5 py-1 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded transition"
+                >
+                  {isBulkOpen ? "Sembunyikan" : "Tampilkan Alat"}
+                </button>
+              </div>
+
+              {isBulkOpen && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 border-t border-slate-800/60">
+                  {/* Left Column: Download Template & Actions */}
+                  <div className="space-y-3.5 pr-0 md:pr-4 md:border-r md:border-slate-800/60 text-left">
+                    <span className="font-bold text-slate-300 block">1. Unduh Template</span>
+                    <p className="text-slate-400 text-[11px] leading-relaxed">
+                      Unduh berkas template di bawah ini, isi data pengembangan diri Anda di Excel atau editor teks, lalu upload kembali ke sini.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDownloadCSVTemplate}
+                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded font-bold flex items-center space-x-1.5 transition"
+                      >
+                        <Download size={12} />
+                        <span>Template CSV (Excel)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDownloadJSONTemplate}
+                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded font-bold flex items-center space-x-1.5 transition"
+                      >
+                        <Download size={12} />
+                        <span>Template JSON</span>
+                      </button>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-800/40 space-y-2">
+                      <span className="font-bold text-red-400 block">Tindakan Cepat (Danger Zone)</span>
+                      <p className="text-slate-500 text-[10px]">
+                        Tindakan ini akan menghapus seluruh daftar pengembangan diri yang tersimpan saat ini secara permanen.
+                      </p>
+                      
+                      {isHapusSemuaConfirm ? (
+                        <div className="flex items-center space-x-2">
+                          <button
+                            type="button"
+                            onClick={handleHapusSemua}
+                            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded transition"
+                          >
+                            Ya, Hapus Semua Sekarang
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsHapusSemuaConfirm(false)}
+                            className="px-3 py-1.5 bg-slate-800 text-slate-400 hover:text-white rounded transition"
+                          >
+                            Batal
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={list.length === 0}
+                          onClick={() => setIsHapusSemuaConfirm(true)}
+                          className={`px-3 py-1.5 font-bold rounded flex items-center space-x-1.5 transition ${
+                            list.length === 0 
+                              ? "bg-slate-800 text-slate-600 cursor-not-allowed" 
+                              : "bg-red-600/15 hover:bg-red-600/35 text-red-400"
+                          }`}
+                        >
+                          <Trash2 size={12} />
+                          <span>Kosongkan / Hapus Semua</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Column: Upload / Import */}
+                  <div className="space-y-3.5 text-left">
+                    <span className="font-bold text-slate-300 block">2. Unggah & Impor File</span>
+                    
+                    <div className="flex items-center space-x-4">
+                      <span className="text-slate-400 text-[11px]">Metode Impor:</span>
+                      <label className="inline-flex items-center space-x-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="importMethod"
+                          checked={importMethod === "append"}
+                          onChange={() => setImportMethod("append")}
+                          className="text-amber-500 focus:ring-amber-500/20 bg-slate-900 border-slate-700"
+                        />
+                        <span className="font-medium text-slate-300">Gabung (Append)</span>
+                      </label>
+                      <label className="inline-flex items-center space-x-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="importMethod"
+                          checked={importMethod === "overwrite"}
+                          onChange={() => setImportMethod("overwrite")}
+                          className="text-amber-500 focus:ring-amber-500/20 bg-slate-900 border-slate-700"
+                        />
+                        <span className="font-medium text-slate-300">Ganti Semua (Overwrite)</span>
+                      </label>
+                    </div>
+
+                    {/* Drag and Drop Zone */}
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                      onDragLeave={() => setDragActive(false)}
+                      onDrop={async (e) => {
+                        e.preventDefault();
+                        setDragActive(false);
+                        const file = e.dataTransfer.files?.[0];
+                        if (file) await processImportFile(file);
+                      }}
+                      className={`border-2 border-dashed rounded-xl p-5 text-center transition cursor-pointer relative ${
+                        dragActive 
+                          ? "border-amber-500 bg-amber-500/5 text-amber-400" 
+                          : "border-slate-800 bg-slate-950/20 hover:border-slate-700 hover:bg-slate-950/30 text-slate-400"
+                      }`}
+                    >
+                      <input
+                        type="file"
+                        accept=".csv,.json"
+                        onChange={handleFileUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                      <div className="flex flex-col items-center space-y-1.5">
+                        <Upload size={20} className={dragActive ? "text-amber-400" : "text-slate-500"} />
+                        <span className="font-bold text-slate-300 text-[11px]">Tarik & Lepas berkas di sini</span>
+                        <span className="text-[10px] text-slate-500">atau klik untuk memilih berkas (.csv atau .json)</span>
+                      </div>
+                    </div>
+
+                    {importError && (
+                      <div className="p-2.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-[10px] flex items-start space-x-1.5">
+                        <ShieldAlert size={12} className="shrink-0 mt-0.5" />
+                        <span>{importError}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
@@ -784,104 +1134,120 @@ export default function AdminDashboard({
               <tbody className="divide-y divide-slate-800/50">
                 {filteredList.map((item) => {
                   const originalIndex = list.indexOf(item);
+                  const isEditingThis = editorItem && editorItem.id === item.id && !isAdding;
                   return (
-                    <tr key={item.id} className="hover:bg-slate-900/40 transition">
-                      <td className="py-3 pl-3 text-center font-mono font-bold text-amber-500/90 text-xs">
-                        {originalIndex + 1}
-                      </td>
-                      <td className="py-3">
-                        <span className="font-bold text-white block">
-                          {item.taskName || item.title || item.name || item.position || item.level}
-                        </span>
-                        {item.type && (
-                          <div className="flex items-center space-x-2 mt-0.5">
-                            <span className="text-[10px] font-mono text-amber-500 font-bold">{item.type}</span>
-                            {item.showOnFront !== undefined && (
-                              <span className={`text-[8px] font-mono px-1.5 py-0.5 rounded font-bold border ${
-                                item.showOnFront 
-                                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                                  : "bg-slate-800 text-slate-500 border-slate-700"
-                              }`}>
-                                {item.showOnFront ? "TAMPIL DI DEPAN" : "DISEMBUNYIKAN"}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </td>
-                      <td className="py-3 text-slate-400 max-w-sm truncate">
-                        {item.organizer || item.institution || item.publisher || item.problem || item.situation || item.description || "-"}
-                      </td>
-                      <td className="py-3 text-right pr-3">
-                        <div className="inline-flex space-x-2 items-center">
-                          {/* Reordering priority buttons */}
-                          <div className="flex space-x-1 border-r border-slate-800/60 pr-2 mr-1">
-                            <button
-                              type="button"
-                              disabled={originalIndex === 0 || !!searchTerm}
-                              onClick={() => handleMoveUp(originalIndex)}
-                              className={`p-1 rounded transition ${
-                                originalIndex === 0 || !!searchTerm
-                                  ? "text-slate-600 cursor-not-allowed opacity-30" 
-                                  : "bg-slate-800/60 hover:bg-slate-800 text-amber-500 hover:text-amber-400"
-                              }`}
-                              title={!!searchTerm ? "Bersihkan pencarian untuk mengurutkan" : "Geser ke Atas (Prioritas Utama)"}
-                            >
-                              <ArrowUp size={12} />
-                            </button>
-                            <button
-                              type="button"
-                              disabled={originalIndex === list.length - 1 || !!searchTerm}
-                              onClick={() => handleMoveDown(originalIndex)}
-                              className={`p-1 rounded transition ${
-                                originalIndex === list.length - 1 || !!searchTerm
-                                  ? "text-slate-600 cursor-not-allowed opacity-30" 
-                                  : "bg-slate-800/60 hover:bg-slate-800 text-amber-500 hover:text-amber-400"
-                              }`}
-                              title={!!searchTerm ? "Bersihkan pencarian untuk mengurutkan" : "Geser ke Bawah (Prioritas Akhir)"}
-                            >
-                              <ArrowDown size={12} />
-                            </button>
-                          </div>
-
-                          <button
-                            onClick={() => { setEditorItem(item); setIsAdding(false); }}
-                            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition"
-                            title="Edit"
-                          >
-                            <Edit2 size={12} />
-                          </button>
-                          {deleteConfirmId === item.id ? (
-                            <div className="inline-flex items-center space-x-1 animate-pulse">
+                    <React.Fragment key={item.id}>
+                      <tr className={`hover:bg-slate-900/40 transition ${isEditingThis ? "bg-amber-500/5" : ""}`}>
+                        <td className="py-3 pl-3 text-center font-mono font-bold text-amber-500/90 text-xs">
+                          {originalIndex + 1}
+                        </td>
+                        <td className="py-3">
+                          <span className="font-bold text-white block">
+                            {item.taskName || item.title || item.name || item.position || item.level}
+                          </span>
+                          {item.type && (
+                            <div className="flex items-center space-x-2 mt-0.5">
+                              <span className="text-[10px] font-mono text-amber-500 font-bold">{item.type}</span>
+                              {item.showOnFront !== undefined && (
+                                <span className={`text-[8px] font-mono px-1.5 py-0.5 rounded font-bold border ${
+                                  item.showOnFront 
+                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+                                    : "bg-slate-800 text-slate-500 border-slate-700"
+                                }`}>
+                                  {item.showOnFront ? "TAMPIL DI DEPAN" : "DISEMBUNYIKAN"}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3 text-slate-400 max-w-sm truncate">
+                          {item.organizer || item.institution || item.publisher || item.problem || item.situation || item.description || "-"}
+                        </td>
+                        <td className="py-3 text-right pr-3">
+                          <div className="inline-flex space-x-2 items-center">
+                            {/* Reordering priority buttons */}
+                            <div className="flex space-x-1 border-r border-slate-800/60 pr-2 mr-1">
                               <button
-                                onClick={() => handleDelete(item.id)}
-                                className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] rounded transition-all"
-                                title="Konfirmasi Hapus"
+                                type="button"
+                                disabled={originalIndex === 0 || !!searchTerm}
+                                onClick={() => handleMoveUp(originalIndex)}
+                                className={`p-1 rounded transition ${
+                                  originalIndex === 0 || !!searchTerm
+                                    ? "text-slate-600 cursor-not-allowed opacity-30" 
+                                    : "bg-slate-800/60 hover:bg-slate-800 text-amber-500 hover:text-amber-400"
+                                }`}
+                                title={!!searchTerm ? "Bersihkan pencarian untuk mengurutkan" : "Geser ke Atas (Prioritas Utama)"}
                               >
-                                Yakin?
+                                <ArrowUp size={12} />
                               </button>
                               <button
-                                onClick={() => setDeleteConfirmId(null)}
-                                className="p-1 bg-slate-800 text-slate-400 hover:text-white rounded"
-                                title="Batal"
+                                type="button"
+                                disabled={originalIndex === list.length - 1 || !!searchTerm}
+                                onClick={() => handleMoveDown(originalIndex)}
+                                className={`p-1 rounded transition ${
+                                  originalIndex === list.length - 1 || !!searchTerm
+                                    ? "text-slate-600 cursor-not-allowed opacity-30" 
+                                    : "bg-slate-800/60 hover:bg-slate-800 text-amber-500 hover:text-amber-400"
+                                }`}
+                                title={!!searchTerm ? "Bersihkan pencarian untuk mengurutkan" : "Geser ke Bawah (Prioritas Akhir)"}
                               >
-                                <X size={10} />
+                                <ArrowDown size={12} />
                               </button>
                             </div>
-                          ) : (
+
                             <button
-                              onClick={() => {
-                                setDeleteConfirmId(item.id);
-                                setTimeout(() => setDeleteConfirmId(prev => prev === item.id ? null : prev), 4000);
-                              }}
-                              className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition"
-                              title="Hapus"
+                              onClick={() => { setEditorItem(item); setIsAdding(false); }}
+                              className={`p-1.5 rounded-lg transition ${
+                                isEditingThis 
+                                  ? "bg-amber-500 text-slate-950 font-bold" 
+                                  : "bg-slate-800 hover:bg-slate-700 text-white"
+                              }`}
+                              title="Edit"
                             >
-                              <Trash2 size={12} />
+                              <Edit2 size={12} />
                             </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                            {deleteConfirmId === item.id ? (
+                              <div className="inline-flex items-center space-x-1 animate-pulse">
+                                <button
+                                  onClick={() => handleDelete(item.id)}
+                                  className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] rounded transition-all"
+                                  title="Konfirmasi Hapus"
+                                >
+                                  Yakin?
+                                </button>
+                                <button
+                                  onClick={() => setDeleteConfirmId(null)}
+                                  className="p-1 bg-slate-800 text-slate-400 hover:text-white rounded"
+                                  title="Batal"
+                                >
+                                  <X size={10} />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setDeleteConfirmId(item.id);
+                                  setTimeout(() => setDeleteConfirmId(prev => prev === item.id ? null : prev), 4000);
+                                }}
+                                className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition"
+                                title="Hapus"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                      {isEditingThis && (
+                        <tr className="bg-slate-900 border-l-2 border-amber-500">
+                          <td colSpan={4} className="p-4 bg-slate-950/40 border-b border-amber-500/20">
+                            <div className="max-w-4xl mx-auto py-1">
+                              {renderForm()}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })}
                 {filteredList.length === 0 && (
